@@ -31,6 +31,7 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 - `python-uv-ci-setup`
 - `python-project-bootstrap`
 - `api-spec-sync`
+- `adr-management`
 - `git-commit`
 
 ## 更新方針

@@ -25,6 +25,8 @@ PLAYBOOK_OUTPUT_DIR = Path("docs/ai/playbooks")
 
 AUTO_GENERATED_NOTICE = "<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->\n"
 FRONTMATTER_PATTERN = re.compile(r"\A---\n.*?\n---\n?", re.DOTALL)
+AGENTS_WARN_BYTES = 8 * 1024
+AGENTS_HARD_LIMIT_BYTES = 32 * 1024
 ROUTING_BULLET_PLAYBOOK_PATTERN = re.compile(r"-\s*(.+?)\s*:\s*`([a-z0-9-]+)`")
 ROUTING_TABLE_PLAYBOOK_LINK_PATTERN = re.compile(
     r"\[([^\]]+)\]\((?:\./)?docs/ai/playbooks/([a-z0-9-]+)\.md(?:#[^)]+)?\)"
@@ -216,13 +218,40 @@ def build_outputs(
     return outputs
 
 
+def normalized_content(content: str) -> str:
+    """末尾改行を正規化した文字列を返す。"""
+    return content.rstrip() + "\n"
+
+
+def validate_agents_size(outputs: dict[Path, str]) -> int:
+    """AGENTS.md のサイズを検査して、継続可否を返す。"""
+    agents_rel_path = OUTPUT_FILES["agents"]
+    agents_content = normalized_content(outputs[agents_rel_path])
+    size = len(agents_content.encode("utf-8"))
+
+    if size > AGENTS_WARN_BYTES:
+        print(
+            f"[WARN] AGENTS.md size is {size} bytes "
+            f"(recommended <= {AGENTS_WARN_BYTES} bytes)."
+        )
+
+    if size > AGENTS_HARD_LIMIT_BYTES:
+        print(
+            f"[NG] AGENTS.md size is {size} bytes "
+            f"(hard limit: {AGENTS_HARD_LIMIT_BYTES} bytes)."
+        )
+        print("Move detailed procedures from AGENTS.md to docs/ai/playbooks/*.md.")
+        return 1
+    return 0
+
+
 def write_outputs(root: Path, outputs: dict[Path, str]) -> list[Path]:
     """出力を書き込み、変更されたファイル一覧を返す。"""
     changed: list[Path] = []
     for rel_path, content in outputs.items():
         path = root / rel_path
         path.parent.mkdir(parents=True, exist_ok=True)
-        normalized = content.rstrip() + "\n"
+        normalized = normalized_content(content)
         if path.exists() and path.read_text(encoding="utf-8") == normalized:
             continue
         path.write_text(normalized, encoding="utf-8")
@@ -235,7 +264,7 @@ def check_outputs(root: Path, outputs: dict[Path, str]) -> list[Path]:
     drift: list[Path] = []
     for rel_path, content in outputs.items():
         path = root / rel_path
-        expected = content.rstrip() + "\n"
+        expected = normalized_content(content)
         if not path.exists() or path.read_text(encoding="utf-8") != expected:
             drift.append(rel_path)
     return drift
@@ -262,6 +291,9 @@ def main() -> int:
     playbook_names = [playbook_name for _, playbook_name in playbook_routes]
     playbooks = read_canonical_playbooks(root, playbook_names)
     outputs = build_outputs(canonical, playbook_routes, playbooks)
+    size_validation = validate_agents_size(outputs)
+    if size_validation != 0:
+        return size_validation
 
     if args.check:
         drift = check_outputs(root, outputs)

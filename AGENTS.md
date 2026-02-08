@@ -14,6 +14,9 @@
 - 既存の実装・ドキュメントとの整合を保ち、変更理由を記録する。
 - ユーザーとのコミュニケーションは日本語で行う。
 - CI は必須とし、品質ゲートの不一致を許容しない。
+- Python パッケージの追加・更新・削除は `uv add` / `uv remove` / `uv sync` を使用し、`pip install` / `uv pip install` は使用しない。
+- APIキー・トークン・秘密鍵・`.env.keys` などの秘密情報は、出力・コミット・Issue/PR本文へ記載しない。
+- 想定外の大量差分、履歴破壊操作、広範囲削除が必要になった場合は作業を停止し、ユーザーへ再確認する。
 - `README.md` は人間向けの入口として、目的・全体像・セットアップ・利用導線を記載する。
 - `AGENTS.md` はエージェント向け実行規約として、判断基準・編集制約・検証手順・タスクルーティングを記載する。
 - エージェント実行の詳細手順は `README.md` に重複記載しない。必要な場合は `AGENTS.md` と `docs/ai/playbooks/*.md` へリンクする。
@@ -26,6 +29,7 @@
 | Python の CI / 品質ゲート導入 | `uv` 前提で lint/type/test/CI を一貫運用したい | [python-uv-ci-setup](docs/ai/playbooks/python-uv-ci-setup.md) |
 | 新規プロジェクト初期構築 | Python プロジェクトを Hexagonal + 運用標準で立ち上げる | [python-project-bootstrap](docs/ai/playbooks/python-project-bootstrap.md) |
 | API 仕様同期 | API 実装と仕様ドキュメントの差分を同期する | [api-spec-sync](docs/ai/playbooks/api-spec-sync.md) |
+| 設計判断の記録・更新 | アーキテクチャ方針や運用ルールの採否を ADR として記録・更新する | [adr-management](docs/ai/playbooks/adr-management.md) |
 | コミット実行 | 変更内容を確認して規約に沿ったコミットを行う | [git-commit](docs/ai/playbooks/git-commit.md) |
 
 ## 使い分けルール

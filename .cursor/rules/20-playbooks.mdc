@@ -18,6 +18,7 @@ alwaysApply: true
 - Python の CI / 品質ゲート導入: `docs/ai/playbooks/python-uv-ci-setup.md`
 - 新規プロジェクト初期構築: `docs/ai/playbooks/python-project-bootstrap.md`
 - API 仕様同期: `docs/ai/playbooks/api-spec-sync.md`
+- 設計判断の記録・更新: `docs/ai/playbooks/adr-management.md`
 - コミット実行: `docs/ai/playbooks/git-commit.md`
 
 ## 運用注意
