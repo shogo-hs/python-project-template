@@ -51,7 +51,7 @@ description: 新しい Python プロジェクトの初期セットアップを�
 6. 検証する。
 - 生成ファイル一覧を確認する。
 - `AGENTS.md` の必須セクションが埋まっていることを確認する。
-- `.env.development` / `.env.production` / `.env.example` の整合を確認する。
+- `.env.development` / `.env.production` の整合を確認する。
 - CI 設定完了後に `uv run pre-commit install` が実行可能な状態であることを確認する。
 
 7. 結果を報告する。

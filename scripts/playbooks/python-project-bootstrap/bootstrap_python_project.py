@@ -685,15 +685,6 @@ OPENAI_API_KEY="encrypted:<REPLACE_WITH_ENCRYPTED_VALUE>"
 """
 
 
-def build_env_example() -> str:
-    """.env.example テンプレートを返す。"""
-    return """APP_ENV="development"
-LOG_LEVEL="INFO"
-DATABASE_URL="postgresql://app:app@localhost:5432/app"
-OPENAI_API_KEY=""
-"""
-
-
 def parse_args() -> argparse.Namespace:
     """CLI 引数を解析する。"""
     parser = argparse.ArgumentParser(description="Python プロジェクト初期構成を生成する")
@@ -765,7 +756,6 @@ def main() -> None:
         target / "docs" / "api" / "_endpoint_template.md": build_api_endpoint_template(),
         target / ".env.development": build_env_file("development"),
         target / ".env.production": build_env_file("production"),
-        target / ".env.example": build_env_example(),
     }
 
     for path, content in files.items():
