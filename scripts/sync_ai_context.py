@@ -25,7 +25,11 @@ PLAYBOOK_OUTPUT_DIR = Path("docs/ai/playbooks")
 
 AUTO_GENERATED_NOTICE = "<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->\n"
 FRONTMATTER_PATTERN = re.compile(r"\A---\n.*?\n---\n?", re.DOTALL)
-ROUTING_PLAYBOOK_PATTERN = re.compile(r"-\s*(.+?)\s*:\s*`([a-z0-9-]+)`")
+ROUTING_BULLET_PLAYBOOK_PATTERN = re.compile(r"-\s*(.+?)\s*:\s*`([a-z0-9-]+)`")
+ROUTING_TABLE_PLAYBOOK_LINK_PATTERN = re.compile(
+    r"\[([^\]]+)\]\((?:\./)?docs/ai/playbooks/([a-z0-9-]+)\.md(?:#[^)]+)?\)"
+)
+ROUTING_TABLE_HEADER_LABELS = {"判断ケース", "ケース", "タスク", "---"}
 
 
 def auto_header(source: str) -> str:
@@ -56,8 +60,30 @@ def extract_playbook_routes(routing_markdown: str) -> list[tuple[str, str]]:
     """task-routing から (表示名, playbook名) の順序付き一覧を抽出する。"""
     routes: list[tuple[str, str]] = []
     seen: set[str] = set()
+
     for line in routing_markdown.splitlines():
-        match = ROUTING_PLAYBOOK_PATTERN.search(line.strip())
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        link_match = ROUTING_TABLE_PLAYBOOK_LINK_PATTERN.search(stripped)
+        if link_match is None:
+            continue
+
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        header_candidate = cells[0].replace("`", "").strip() if cells else ""
+        if header_candidate and header_candidate not in ROUTING_TABLE_HEADER_LABELS:
+            label = header_candidate
+        else:
+            label = link_match.group(1).strip()
+        playbook = link_match.group(2)
+
+        if playbook in seen:
+            continue
+        routes.append((label, playbook))
+        seen.add(playbook)
+
+    for line in routing_markdown.splitlines():
+        match = ROUTING_BULLET_PLAYBOOK_PATTERN.search(line.strip())
         if not match:
             continue
         label, playbook = match.group(1), match.group(2)

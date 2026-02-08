@@ -1,14 +1,16 @@
 # タスクルーティング
 
-- 実装前設計: `task-design-gate`
-- Python の CI / 品質ゲート導入: `python-uv-ci-setup`
-- 新規プロジェクト初期構築: `python-project-bootstrap`
-- API 仕様同期: `api-spec-sync`
-- コミット実行: `git-commit`
+| 判断ケース | この条件なら使う | 参照先Playbook |
+| --- | --- | --- |
+| 実装前設計 | 実装・修正・移行など、ファイル変更前にスコープ整理と承認が必要 | [task-design-gate](docs/ai/playbooks/task-design-gate.md) |
+| Python の CI / 品質ゲート導入 | `uv` 前提で lint/type/test/CI を一貫運用したい | [python-uv-ci-setup](docs/ai/playbooks/python-uv-ci-setup.md) |
+| 新規プロジェクト初期構築 | Python プロジェクトを Hexagonal + 運用標準で立ち上げる | [python-project-bootstrap](docs/ai/playbooks/python-project-bootstrap.md) |
+| API 仕様同期 | API 実装と仕様ドキュメントの差分を同期する | [api-spec-sync](docs/ai/playbooks/api-spec-sync.md) |
+| コミット実行 | 変更内容を確認して規約に沿ったコミットを行う | [git-commit](docs/ai/playbooks/git-commit.md) |
 
 ## 使い分けルール
 
-- AGENTS.md には「いつどの Playbook を使うか」だけを書く。
+- AGENTS.md には「いつどの Playbook を使うか」を書き、実行時はリンク先ドキュメントを参照する。
 - 詳細手順の正本は `docs/ai/canonical/playbooks/*.md` に集約し、`scripts/sync_ai_context.py` で `docs/ai/playbooks/*.md` へ配布する。
 - 参照資料は `docs/ai/playbook-assets/`、補助スクリプトは `scripts/playbooks/` に集約する。
 - 同じ手順を AGENTS.md と Playbook に重複記載しない。

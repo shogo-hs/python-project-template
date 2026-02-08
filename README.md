@@ -39,6 +39,16 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 - `docs/ai/playbooks/*.md`、`AGENTS.md`、`.cursor/rules/*.mdc` は自動生成物として直接編集しない。
 - Playbook の参照資料は `docs/ai/playbook-assets/`、補助スクリプトは `scripts/playbooks/` を正本とする。
 
+## README と AGENTS の書き分け
+
+| 書く場所 | 主な読者 | 記載する内容 | 記載しない内容 |
+| --- | --- | --- | --- |
+| `README.md` | 人間（開発者・利用者） | プロジェクト概要、構成、導入手順、運用導線 | エージェント向けの詳細実行規約 |
+| `AGENTS.md` | AIエージェント | 実行時に守るルール、タスクルーティング、品質ゲート | 人向けの背景説明や長いオンボーディング解説 |
+
+- エージェント向けの運用ルールを変更する場合は、`AGENTS.md` を直接編集せず `docs/ai/canonical/*.md` を更新して再生成する。
+- ルーティングと実行手順は `AGENTS.md` から `docs/ai/playbooks/*.md` を参照する。
+
 ## 運用ルール
 
 1. 必要な正本（canonical / playbook-assets / scripts/playbooks）を編集する。
