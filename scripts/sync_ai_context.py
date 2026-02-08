@@ -159,7 +159,7 @@ def build_cursor_playbooks_rule(playbook_routes: list[tuple[str, str]]) -> str:
     lines = [
         "# 共通Playbook運用",
         "",
-        "- 詳細手順は `docs/ai/playbooks/*.md` を正本として参照する。",
+        "- 詳細手順の正本は `docs/ai/canonical/playbooks/*.md` とし、実行時は `docs/ai/playbooks/*.md` を参照する。",
         "- 依頼内容が該当する playbook を選び、実行フローと厳守ルールに従う。",
         "- 複数 playbook が該当する場合は、最小セットを順に適用する。",
         "- 手順の重複記述を避け、ルール本文には参照先のみを書く。",

@@ -22,8 +22,8 @@ description: 新しい Python プロジェクトの初期セットアップを�
 
 1. 前提を確認する。
 - ルートディレクトリと Git 管理状態を確認する。
-- 既存の `AGENTS.md`、`docs/tasks` または `docs/task-designs` の有無を確認する。
-- 既存構成があれば、パス命名を尊重する。
+- 既存の `AGENTS.md` と `docs/task-designs` の有無を確認する。
+- 既存プロジェクトで `docs/tasks` を使っている場合のみ、後方互換として既存パス命名を尊重する。
 - 空リポジトリの場合は「初回のみグローバル bootstrap」を適用し、完了後に repo ローカル Playbook 運用へ移行する。
 
 2. AGENTS.md 情報を対話で確定する。
@@ -36,7 +36,7 @@ description: 新しい Python プロジェクトの初期セットアップを�
 - `scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py` を実行して、ディレクトリと初期ドキュメントを生成する。
 - 例:
   - `python3 scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py --target <project-root> --project-name <name> --package-name <package_name> --description "<description>"`
-- 必要に応じて `--task-design-dir docs/task-designs` や `--force` を使う。
+- 必要に応じて `--task-design-dir docs/task-designs`（既定）や `--force` を使う。
 - 生成後に手順正本を `<repo>/docs/ai/canonical/playbooks/` に配置してコミットし、以後の実行基盤を repo ローカルへ固定する。
 
 4. 生成内容をレビューする。

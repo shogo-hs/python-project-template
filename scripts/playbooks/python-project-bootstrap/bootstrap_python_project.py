@@ -7,6 +7,34 @@ import argparse
 import re
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+PLAYBOOK_ASSETS_ROOT = REPO_ROOT / "docs" / "ai" / "playbook-assets"
+TASK_DESIGN_TEMPLATE_PATH = (
+    PLAYBOOK_ASSETS_ROOT
+    / "task-design-gate"
+    / "references"
+    / "_task-design-template.md"
+)
+API_INDEX_TEMPLATE_PATH = (
+    PLAYBOOK_ASSETS_ROOT
+    / "api-spec-sync"
+    / "references"
+    / "_index_template.md"
+)
+API_ENDPOINT_TEMPLATE_PATH = (
+    PLAYBOOK_ASSETS_ROOT
+    / "api-spec-sync"
+    / "references"
+    / "_endpoint_template.md"
+)
+
+
+def load_template(path: Path, fallback: str) -> str:
+    """テンプレートを正本から読み込み、なければフォールバックを返す。"""
+    if path.exists():
+        return path.read_text(encoding="utf-8")
+    return fallback
+
 
 def normalize_package_name(name: str) -> str:
     """プロジェクト名から Python パッケージ名を生成する。"""
@@ -25,9 +53,11 @@ def detect_task_design_dir(target: Path, explicit: str | None) -> str:
 
     docs_task_designs = target / "docs" / "task-designs"
     docs_tasks = target / "docs" / "tasks"
-    if docs_task_designs.exists() and not docs_tasks.exists():
+    if docs_task_designs.exists():
         return "docs/task-designs"
-    return "docs/tasks"
+    if docs_tasks.exists():
+        return "docs/tasks"
+    return "docs/task-designs"
 
 
 def write_text_file(path: Path, content: str, force: bool, report: dict[str, list[str]]) -> None:
@@ -332,7 +362,29 @@ def build_task_readme(task_design_dir: str) -> str:
 
 def build_task_template() -> str:
     """タスク設計テンプレートを返す。"""
-    return """# タスク設計書: <タイトル>
+    fallback = """# タスク設計書テンプレート
+
+## ファイル命名規則
+
+- 保存先: リポジトリ配下の `docs/task-designs/` に保存する。
+- `docs/task-designs/` が存在しない場合は作成してから保存する。
+- 形式: `YYYYMMDDHHMMSS_{task-name}.md`
+- `YYYYMMDDHHMMSS` は初版作成日時を日本時間（JST）で使用する。
+- `task-name` は英小文字の kebab-case を推奨（スペースなし）。
+- 更新時は原則ファイル名を変更しない。更新日は本文の `最終更新` を更新する。
+- 既存ドキュメントで作成時刻が不明な場合は `YYYYMMDD000000_{task-name}.md` を使用する。
+- `README.md` と `_task-design-template.md` は例外（プレフィックス不要）。
+
+例:
+
+- `docs/task-designs/20260101103045_frontend-run-history-delete.md`
+- `docs/task-designs/20251224000000_backend-run-history-list-api-auth.md`
+
+## 本文フォーマット
+
+以下の順序で出力すること。該当なしは `該当なし` と明記する。
+
+# タスク設計書: <タイトル>
 
 最終更新: <YYYY-MM-DD>
 - ステータス: <下書き(draft) / レビュー待ち(review-ready) / 承認済み(approved) / 保留(blocked) / 実装中(in-progress) / 完了(done)>
@@ -344,9 +396,12 @@ def build_task_template() -> str:
 
 ## 0. TL;DR
 - <目的と結論を3〜5行で要約>
+- <何をどこに追加/変更するか>
+- <影響範囲や注意点>
 
 ## 1. 背景 / 課題
 - <なぜこの変更が必要か>
+- <現状の課題や制約>
 
 ## 2. ゴール / 非ゴール
 ### 2.1 ゴール
@@ -377,106 +432,237 @@ def build_task_template() -> str:
 | --- | --- | --- | --- |
 | <component / file / API> | <何を変えるか> | <影響> | <補足> |
 
-## 6. テスト計画
+### 5.3 詳細
+#### API
+- <エンドポイント/リクエスト/レスポンス/エラー>
+
+#### UI
+- <画面/導線/コピー/バリデーション>
+
+#### データモデル / 永続化
+- <スキーマ/保存先/移行>
+
+#### 設定 / 環境変数
+- <追加/変更/デフォルト値>
+
+### 5.4 代替案と不採用理由
+- 代替案A: <案>
+  - 不採用理由: <理由>
+- 代替案B: <案>
+  - 不採用理由: <理由>
+
+## 6. 移行 / ロールアウト
+- <段階的リリース/フラグ/リスク低減策>
+- ロールバック条件: <切り戻し判断基準>
+- ロールバック手順: <手順>
+
+## 7. テスト計画
 - 単体: <対象>
 - 結合: <対象>
 - 手動: <手順>
-- 合格条件: <何をもって完了とするか>
+- LLM/外部依存: <モック方針>
+- 合格条件: <何をもってテスト完了とするか>
 
-## 7. 受け入れ基準
-- <操作手順と期待結果>
+## 8. 受け入れ基準
+- <操作手順と期待結果を列挙>
 
-## 8. リスク / 対策
+## 9. リスク / 対策
 - <リスクと回避策>
 
-## 9. オープン事項 / 要確認
-- <未確定事項>
-- ※未解消事項がある場合、実装を開始しない。
+## 10. オープン事項 / 要確認
+- <未確定事項・相談事項>
+- ※本セクションが埋まっている（=未解消事項がある）場合、**実装は開始しない**。依頼者と実行者で合意が取れ次第、項目を解消してから着手する。
 
-## 10. 実装タスクリスト
+## 11. 実装タスクリスト
 - [ ] <実装タスク>
 - [ ] <テスト追加>
-- [ ] <運用作業>
+- [ ] <必要な移行/運用作業>
 
-## 11. ドキュメント更新
+## 12. ドキュメント更新
 - [ ] `README.md`（必要に応じて）
 - [ ] `AGENTS.md`（必要に応じて）
 - [ ] `docs/`（該当ファイルあれば）
 
-## 12. 承認ログ
+## 13. 承認ログ
 - 承認者: <名前>
 - 承認日時: <YYYY-MM-DD HH:mm>
-- 承認コメント: <条件付き承認なら条件を明記>
+- 承認コメント: <条件付き承認の場合は条件を明記>
 
 ## 実装開始条件
 - [ ] ステータスが `承認済み(approved)` である
-- [ ] 9. オープン事項が空である
+- [ ] 10. オープン事項が空である
 - [ ] 受け入れ基準とテスト計画に合意済み
 """
+    return load_template(TASK_DESIGN_TEMPLATE_PATH, fallback)
 
 
 def build_api_index() -> str:
     """API index テンプレートを返す。"""
-    return """# API 一覧
+    fallback = """# <サービス名> API エンドポイント一覧
 
-このドキュメントは API 仕様の一覧を管理する。
+最終更新: `<YYYY-MM-DD>`
+ベースURL: `<https://api.example.com>`
 
-## ルール
+## 1. 運用ルール
 
-- 1 エンドポイント 1 ファイルで管理する。
-- 仕様変更時は必ず index と個別ファイルを同時更新する。
-- 実装との差分がない状態を維持する。
+- API実装の変更と同時にこの一覧を更新する。
+- 1エンドポイントにつき詳細ドキュメントは1ファイルにする。
+- 一覧リンク切れを残さない。
 
-## エンドポイント
+## 2. 共通仕様
 
-| ID | Method | Path | Summary | Spec |
-| --- | --- | --- | --- | --- |
-| sample-health | GET | /health | ヘルスチェック | `docs/api/sample-health.md` |
+### 2.1 認証
+
+- 対象: `<例: /api/v1/*>`
+- ヘッダー: `<例: Authorization: Bearer <ID_TOKEN>>`
+- 未認証時: `<例: 401 Unauthorized>`
+
+### 2.2 共通ヘッダー
+
+- `Content-Type: application/json`（ボディありの場合）
+- `X-Request-Id`（任意）
+
+### 2.3 エラーフォーマット
+
+```json
+{
+  "error": {
+    "message": "Authorization header is missing",
+    "type": "http_error",
+    "details": {
+      "field": "optional"
+    }
+  }
+}
+```
+
+### 2.4 タイムアウト・リトライ方針（任意）
+
+- タイムアウト: `<例: 30s>`
+- リトライ: `<例: GETのみ最大2回>`
+
+## 3. エンドポイント一覧
+
+### <ドメイン名1>
+
+- [GET /path](./sample-get.md) - `<概要>`
+- [POST /path](./sample-post.md) - `<概要>`
+
+### <ドメイン名2>
+
+- [PATCH /path/{id}](./sample-patch.md) - `<概要>`
+- [DELETE /path/{id}](./sample-delete.md) - `<概要>`
+
+## 4. 非推奨 / 廃止（任意）
+
+- `GET /legacy/path` - `<廃止日/代替API>`
+
+## 5. 変更履歴（任意）
+
+- `<YYYY-MM-DD>`: `<変更内容要約>`
 """
+    return load_template(API_INDEX_TEMPLATE_PATH, fallback)
 
 
 def build_api_endpoint_template() -> str:
     """API エンドポイントテンプレートを返す。"""
-    return """# <endpoint-id>
+    fallback = """# <METHOD> <PATH> — <機能名>
 
-## 概要
-- Method: `<GET|POST|PUT|PATCH|DELETE>`
-- Path: `</path>`
-- 認証: `<required|optional|none>`
+一覧: [<サービス名> API エンドポイント一覧](<indexファイルへの相対パス>)
+最終更新: `<YYYY-MM-DD>`
 
-## リクエスト
+## 1. 概要
 
-### Path Parameters
-| name | type | required | description |
+- 目的: `<このAPIが何をするか>`
+- 利用者/権限: `<例: ログイン済みユーザーのみ>`
+- 副作用: `<例: DBへ保存 / 非同期ジョブ起動>`
+
+## 2. リクエスト
+
+### 2.1 ヘッダー
+
+| 項目 | 必須 | 値 | 説明 |
 | --- | --- | --- | --- |
+| Authorization | Yes | Bearer `<ID_TOKEN>` | 認証が必要な場合 |
+| Content-Type | Conditional | application/json | ボディありの場合 |
 
-### Query Parameters
-| name | type | required | description |
-| --- | --- | --- | --- |
+### 2.2 パスパラメータ
 
-### Body
-```json
-{}
+| name | type | required | 説明 | 例 |
+| --- | --- | --- | --- | --- |
+| id | string | Yes | 対象ID | `abc123` |
+
+> パスパラメータがない場合は「なし」と明記する。
+
+### 2.3 クエリパラメータ
+
+| name | type | required | デフォルト | 説明 | 例 |
+| --- | --- | --- | --- | --- | --- |
+| limit | integer | No | 20 | 取得件数 | `10` |
+
+> クエリパラメータがない場合は「なし」と明記する。
+
+### 2.4 リクエストボディ
+
+| field | type | required | 制約 | 説明 | 例 |
+| --- | --- | --- | --- | --- | --- |
+| title | string | Yes | 1..120文字 | タイトル | `日報` |
+
+> ボディがない場合は「なし」と明記する。
+
+### 2.5 リクエスト例
+
+```bash
+curl -X <METHOD> '<BASE_URL><PATH>' \
+  -H 'Authorization: Bearer <ID_TOKEN>' \
+  -H 'Content-Type: application/json' \
+  -d '{"example":"value"}'
 ```
 
-## レスポンス
+## 3. レスポンス
 
-### 2xx
+### 3.1 成功レスポンス
+
+| Status | 条件 | 説明 |
+| --- | --- | --- |
+| 200 | 正常終了 | 成功データを返す |
+
+### 3.2 レスポンスボディ
+
+| field | type | nullable | 説明 | 例 |
+| --- | --- | --- | --- | --- |
+| id | string | No | リソースID | `abc123` |
+
+### 3.3 成功レスポンス例
+
 ```json
-{}
+{
+  "id": "abc123"
+}
 ```
 
-### 4xx/5xx
-```json
-{{
-  "error": "<code>",
-  "message": "<human-readable>"
-}}
-```
+## 4. エラー
 
-## 備考
-- 実装と差分がないことを確認する。
+| Status | type | message例 | 発生条件 | クライアント対応 |
+| --- | --- | --- | --- | --- |
+| 400 | validation_error | invalid request | パラメータ不正 | 入力修正 |
+| 401 | http_error | unauthorized | 認証失敗 | 再ログイン |
+| 404 | http_error | not found | 対象なし | 画面再読込 |
+| 500 | internal_error | internal server error | サーバー異常 | リトライ/問い合わせ |
+
+## 5. 備考
+
+- タイムアウト: `<例: 30s>`
+- 冪等性: `<例: Idempotency-Keyで担保>`
+- 非同期処理: `<例: 202でjob_id返却>`
+
+## 6. 実装同期メモ
+
+- 関連実装ファイル: `<path/to/router>`, `<path/to/handler>`
+- 関連テスト: `<path/to/test>`
+- 未解決事項: `<TODO(要実装確認)>`
 """
+    return load_template(API_ENDPOINT_TEMPLATE_PATH, fallback)
 
 
 def build_env_file(environment: str) -> str:
@@ -517,7 +703,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--python-version", default="3.12+", help="Python バージョン表記")
     parser.add_argument(
         "--task-design-dir",
-        help="タスク設計ディレクトリ（例: docs/tasks または docs/task-designs）",
+        help="タスク設計ディレクトリ（既定: docs/task-designs、legacy: docs/tasks）",
     )
     parser.add_argument(
         "--force",

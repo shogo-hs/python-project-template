@@ -33,7 +33,7 @@
 - 個人ホーム配下の資産への依存を必須要件にしない。
 - 空リポジトリから開始する場合のみ、グローバル `python-project-bootstrap` を初回1回だけ使う。
 - 初回生成直後に Playbook 正本を `<repo>/docs/ai/canonical/playbooks/` へ配置し、以後は repo ローカルを正本にする。
-- AGENTS.md では Playbook 名と役割のみを記述し、詳細は repo 内 playbook を正本として参照する。
+- AGENTS.md では Playbook 名と役割のみを記述し、詳細は repo 内 playbook を参照する。
 - Playbook 更新時は PR で差分レビューする。
 
 ## ルーティング例

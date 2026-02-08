@@ -37,7 +37,7 @@
 ## 6. 任意の自動チェック
 
 ```bash
-python3 scripts/check_api_docs_sync.py --docs-root docs/api
+python3 scripts/playbooks/api-spec-sync/check_api_docs_sync.py --docs-root docs/api
 ```
 
 必要に応じて `--code-path` を追加し、実装ファイルの探索範囲をプロジェクトに合わせて調整する。

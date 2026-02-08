@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 
+DEFAULT_CODE_PATHS = ["src", "app", "backend", "server"]
+
 
 def run_git(args: list[str]) -> str:
     result = subprocess.run(
@@ -59,7 +61,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--code-path",
         action="append",
-        default=["src", "app", "backend", "server"],
+        default=None,
         help="API実装が置かれるパス。複数指定可（例: --code-path services/api）",
     )
     parser.add_argument(
@@ -76,9 +78,15 @@ def parse_args() -> argparse.Namespace:
 
 
 def collect_changed_files(base_ref: str) -> list[str]:
+    changed: set[str] = set()
+
     if has_ref(base_ref):
         output = run_git(["diff", "--name-only", base_ref, "--"])
-        return [normalize(line) for line in output.splitlines() if line.strip()]
+        changed.update(normalize(line) for line in output.splitlines() if line.strip())
+        if base_ref == "HEAD":
+            untracked = run_git(["ls-files", "--others", "--exclude-standard"])
+            changed.update(normalize(line) for line in untracked.splitlines() if line.strip())
+        return sorted(changed)
 
     if base_ref != "HEAD":
         raise RuntimeError(f"指定されたrefが見つかりません: {base_ref}")
@@ -87,7 +95,8 @@ def collect_changed_files(base_ref: str) -> list[str]:
     staged = run_git(["diff", "--name-only", "--cached", "--"])
     untracked = run_git(["ls-files", "--others", "--exclude-standard"])
     merged = "\n".join([unstaged, staged, untracked])
-    return [normalize(line) for line in merged.splitlines() if line.strip()]
+    changed.update(normalize(line) for line in merged.splitlines() if line.strip())
+    return sorted(changed)
 
 
 def main() -> int:
@@ -113,7 +122,8 @@ def main() -> int:
         return 0
 
     api_regex = re.compile(args.api_pattern, flags=re.IGNORECASE)
-    code_roots = [normalize(p).rstrip("/") for p in args.code_path]
+    code_paths = args.code_path or DEFAULT_CODE_PATHS
+    code_roots = [normalize(p).rstrip("/") for p in code_paths]
     docs_root = normalize(args.docs_root).rstrip("/")
 
     docs_changed = [p for p in changed if is_under(p, docs_root) and p.endswith(".md")]
