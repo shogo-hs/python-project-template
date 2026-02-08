@@ -3,9 +3,6 @@ name: python-uv-ci-setup
 description: uv を使う Python プロジェクトで、format/lint/静的型チェック/テスト/docstring ルールをローカルと GitHub Actions で一貫運用するためのセットアップスキル。`pyproject.toml` の `[dependency-groups]`、`.pre-commit-config.yaml`、`.github/workflows/ci.yml` を新規作成または更新し、`uv run pre-commit install` まで完了させる依頼で使う。
 ---
 
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->
-<!-- source: docs/ai/canonical/playbooks/python-uv-ci-setup.md + scripts/sync_ai_context.py -->
-
 # Python uv CIセットアップ
 
 このスキルでは、`uv + ruff + mypy + pytest + pre-commit + GitHub Actions` を最小差分で導入し、ローカルとCIの品質ゲートをそろえる。

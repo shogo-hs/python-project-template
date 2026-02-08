@@ -3,9 +3,6 @@ name: task-design-gate
 description: 実装前にタスク設計書を作成し、スコープ・前提・リスクをそろえたうえでユーザー承認を取得するためのスキル。実装・リファクタ・移行・デバッグなど、ファイル変更を伴う依頼で事前計画が必要なときに使う。
 ---
 
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->
-<!-- source: docs/ai/canonical/playbooks/task-design-gate.md + scripts/sync_ai_context.py -->
-
 # タスク設計ゲート
 
 実装ファイルを編集する前に、必ず次の手順を実行する。

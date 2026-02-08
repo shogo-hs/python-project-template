@@ -3,9 +3,6 @@ name: python-project-bootstrap
 description: 新しい Python プロジェクトの初期セットアップを標準化するスキル。AGENTS.md を対話で確定し、Hexagonal Architecture 前提のディレクトリ、SOLID/DRY ガイド、API/タスク設計ドキュメント、`.env.development`/`.env.production` と dotenvx 暗号化運用を整備するときに使う。CI は必須工程とし、品質ゲート設定は必ず `$python-uv-ci-setup` を呼び出して完了させる依頼で適用する。
 ---
 
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->
-<!-- source: docs/ai/canonical/playbooks/python-project-bootstrap.md + scripts/sync_ai_context.py -->
-
 # Pythonプロジェクト初期構築
 
 このスキルは、Python 新規プロジェクトの「最初に揃えるべき構造と運用ドキュメント」を再利用可能な手順で作る。

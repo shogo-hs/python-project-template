@@ -17,5 +17,6 @@ alwaysApply: true
 ## 使い分けルール
 
 - AGENTS.md には「いつどの Skill を使うか」だけを書く。
-- 詳細コマンド・分岐・復旧手順は各 Skill の `SKILL.md` と `references/` を正本にする。
+- 詳細手順の正本は `docs/ai/canonical/playbooks/*.md` に集約し、`scripts/sync_ai_context.py` で `docs/ai/playbooks/*.md` と `.codex/skills/*/SKILL.md` へ配布する。
+- `references/` と `scripts/` は Skill ごとの補助資料として管理する。
 - 同じ手順を AGENTS.md と Skill に重複記載しない。

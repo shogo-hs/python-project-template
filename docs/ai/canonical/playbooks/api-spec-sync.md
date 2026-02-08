@@ -3,9 +3,6 @@ name: api-spec-sync
 description: REST/HTTP APIの定義書（index + 1エンドポイント1ファイル）を新規作成・更新し、実装差分と常時同期させるためのスキル。API実装の追加・変更・削除、認証仕様変更、エラー形式変更、入出力スキーマ変更が発生したときに使う。
 ---
 
-<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->
-<!-- source: docs/ai/canonical/playbooks/api-spec-sync.md + scripts/sync_ai_context.py -->
-
 # API定義書同期
 
 API実装の変更とAPIドキュメント更新を同一タスクで完結させる。
