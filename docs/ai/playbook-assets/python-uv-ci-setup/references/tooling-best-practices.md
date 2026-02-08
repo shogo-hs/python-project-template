@@ -14,6 +14,8 @@
 
 - formatter と linter を Ruff に統一してツール数を減らす。
 - `pydocstyle` は `convention = "google"` を指定する。
+- docstring は短文 1 行のみで終わらせず、処理概要と利用条件が分かる説明を入れる。
+- `Args` / `Returns` / `Raises` は、該当する要素がある場合に記載して入出力と失敗条件を明示する。
 - 日本語 docstring の運用では、英語前提になりやすいルール（例: `D400`, `D401`, `D415`）を必要に応じて除外する。
 - `docstring-code-format = true` を有効化し、docstring 内コード例も整形対象にする。
 

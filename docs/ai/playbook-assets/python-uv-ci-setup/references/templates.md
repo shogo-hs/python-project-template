@@ -61,6 +61,29 @@ testpaths = ["tests"]
 - `requires-python` を更新したら `tool.mypy.python_version` も合わせる。
 - Ruff は `project.requires-python` から推論可能なため、`target-version` は必要時のみ明示する。
 - 既存プロジェクトで docstring 違反が多い場合は、`D` ルールを段階導入する。
+- docstring は短文 1 行で終わらせず、概要と入出力が分かる情報を含める。
+- `Args` / `Returns` / `Raises` は、該当する要素がある場合に必ず記載する。
+
+docstring 記載例（Google style）:
+
+```python
+def publish_report(title: str, dry_run: bool = False) -> str:
+    """レポートを公開し、公開済みまたは公開予定の URL を返す。
+
+    指定されたタイトルでレポートを作成する。`dry_run` が `True` の場合は
+    永続化を行わず、生成予定の URL のみを返す。
+
+    Args:
+        title: 公開するレポートのタイトル。
+        dry_run: `True` の場合は保存処理を実行しない。
+
+    Returns:
+        公開済み、または公開予定のレポート URL。
+
+    Raises:
+        ValueError: `title` が空文字の場合。
+    """
+```
 
 ## 2. .pre-commit-config.yaml（推奨テンプレート）
 

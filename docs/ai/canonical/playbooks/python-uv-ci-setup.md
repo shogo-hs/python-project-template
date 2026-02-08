@@ -55,7 +55,10 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 ## 運用ルール
 
 - 型チェックは `mypy` に固定し、`ty` は使わない。
-- docstring は Google style を採用し、説明文は日本語を許容する設定を使う。
+- docstring は Google style を採用し、短文 1 行のみの記述を避ける。
+- docstring の先頭では「何をする処理か」「どの条件で使うか」を日本語で具体的に説明する。
+- 引数がある処理は `Args`、戻り値がある処理は `Returns`、例外を送出しうる処理は `Raises` を記載する。
+- `pydocstyle` の `convention = "google"` を有効化し、必要に応じて日本語運用に不要なルールのみ最小限で除外する。
 - `project.requires-python` を定義し、Ruff のバージョン推論と整合させる。
 - CI とローカルで実行コマンドを一致させる。
 
