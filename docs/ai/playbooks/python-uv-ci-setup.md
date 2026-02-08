@@ -1,6 +1,6 @@
 ---
 name: python-uv-ci-setup
-description: uv を使う Python プロジェクトで、format/lint/静的型チェック/テスト/docstring ルールをローカルと GitHub Actions で一貫運用するためのセットアップスキル。`pyproject.toml` の `[dependency-groups]`、`.pre-commit-config.yaml`、`.github/workflows/ci.yml` を新規作成または更新し、`uv run pre-commit install` まで完了させる依頼で使う。
+description: uv を使う Python プロジェクトで、format/lint/静的型チェック/テスト/docstring ルールをローカルと GitHub Actions で一貫運用するためのセットアップPlaybook。`pyproject.toml` の `[dependency-groups]`、`.pre-commit-config.yaml`、`.github/workflows/ci.yml` を新規作成または更新し、`uv run pre-commit install` まで完了させる依頼で使う。
 ---
 
 <!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->
@@ -8,7 +8,7 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 
 # Python uv CIセットアップ
 
-このスキルでは、`uv + ruff + mypy + pytest + pre-commit + GitHub Actions` を最小差分で導入し、ローカルとCIの品質ゲートをそろえる。
+このPlaybookでは、`uv + ruff + mypy + pytest + pre-commit + GitHub Actions` を最小差分で導入し、ローカルとCIの品質ゲートをそろえる。
 
 ## 実行フロー
 
@@ -25,7 +25,7 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 3. `pyproject.toml` を `uv` 前提で整備する。
 - 開発依存を `dependency-groups.dev` に集約する。
 - 最低限の開発依存をそろえる: `ruff`, `mypy`, `pytest`, `pre-commit`。
-- ルールは `references/templates.md` の `pyproject.toml` テンプレートを基準にし、既存プロジェクトに合わせて微調整する。
+- ルールは `docs/ai/playbook-assets/python-uv-ci-setup/references/templates.md` の `pyproject.toml` テンプレートを基準にし、既存プロジェクトに合わせて微調整する。
 
 4. pre-commit を設定する。
 - `.pre-commit-config.yaml` を作成または更新する。
@@ -64,5 +64,5 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 
 ## 参照ファイル
 
-- 設定方針と採用理由: `references/tooling-best-practices.md`
-- そのまま適用できる雛形: `references/templates.md`
+- 設定方針と採用理由: `docs/ai/playbook-assets/python-uv-ci-setup/references/tooling-best-practices.md`
+- そのまま適用できる雛形: `docs/ai/playbook-assets/python-uv-ci-setup/references/templates.md`

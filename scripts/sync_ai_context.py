@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""canonical から AGENTS.md と Cursor rules を生成・検証する。"""
+"""canonical から AGENTS.md / Cursor rules / Playbooks を生成・検証する。"""
 
 from __future__ import annotations
 
@@ -22,11 +22,10 @@ OUTPUT_FILES = {
 
 PLAYBOOK_CANONICAL_DIR = Path("docs/ai/canonical/playbooks")
 PLAYBOOK_OUTPUT_DIR = Path("docs/ai/playbooks")
-SKILL_DIR = Path(".codex/skills")
 
 AUTO_GENERATED_NOTICE = "<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->\n"
 FRONTMATTER_PATTERN = re.compile(r"\A---\n.*?\n---\n?", re.DOTALL)
-ROUTING_SKILL_PATTERN = re.compile(r"-\s*(.+?)\s*:\s*`\$([a-z0-9-]+)`")
+ROUTING_PLAYBOOK_PATTERN = re.compile(r"-\s*(.+?)\s*:\s*`([a-z0-9-]+)`")
 
 
 def auto_header(source: str) -> str:
@@ -53,30 +52,30 @@ def read_canonical(root: Path) -> dict[str, str]:
     return contents
 
 
-def extract_skill_routes(routing_markdown: str) -> list[tuple[str, str]]:
-    """task-routing から (表示名, skill名) の順序付き一覧を抽出する。"""
+def extract_playbook_routes(routing_markdown: str) -> list[tuple[str, str]]:
+    """task-routing から (表示名, playbook名) の順序付き一覧を抽出する。"""
     routes: list[tuple[str, str]] = []
     seen: set[str] = set()
     for line in routing_markdown.splitlines():
-        match = ROUTING_SKILL_PATTERN.search(line.strip())
+        match = ROUTING_PLAYBOOK_PATTERN.search(line.strip())
         if not match:
             continue
-        label, skill = match.group(1), match.group(2)
-        if skill in seen:
+        label, playbook = match.group(1), match.group(2)
+        if playbook in seen:
             continue
-        routes.append((label, skill))
-        seen.add(skill)
+        routes.append((label, playbook))
+        seen.add(playbook)
     return routes
 
 
-def read_canonical_playbooks(root: Path, skill_names: list[str]) -> dict[str, str]:
+def read_canonical_playbooks(root: Path, playbook_names: list[str]) -> dict[str, str]:
     """playbook canonical を読み込む。"""
     contents: dict[str, str] = {}
-    for skill_name in skill_names:
-        path = root / PLAYBOOK_CANONICAL_DIR / f"{skill_name}.md"
+    for playbook_name in playbook_names:
+        path = root / PLAYBOOK_CANONICAL_DIR / f"{playbook_name}.md"
         if not path.exists():
             raise FileNotFoundError(f"missing playbook canonical: {path}")
-        contents[skill_name] = path.read_text(encoding="utf-8")
+        contents[playbook_name] = path.read_text(encoding="utf-8")
     return contents
 
 
@@ -129,7 +128,7 @@ def build_cursor_rule(description: str, body: str, source: str) -> str:
     )
 
 
-def build_cursor_playbooks_rule(skill_routes: list[tuple[str, str]]) -> str:
+def build_cursor_playbooks_rule(playbook_routes: list[tuple[str, str]]) -> str:
     """Cursor から共通 playbook を参照するための rule 本文を生成する。"""
     lines = [
         "# 共通Playbook運用",
@@ -141,8 +140,8 @@ def build_cursor_playbooks_rule(skill_routes: list[tuple[str, str]]) -> str:
         "",
         "## Playbook 参照先",
     ]
-    for label, skill_name in skill_routes:
-        lines.append(f"- {label}: `docs/ai/playbooks/{skill_name}.md`")
+    for label, playbook_name in playbook_routes:
+        lines.append(f"- {label}: `docs/ai/playbooks/{playbook_name}.md`")
     lines.extend(
         [
             "",
@@ -156,7 +155,7 @@ def build_cursor_playbooks_rule(skill_routes: list[tuple[str, str]]) -> str:
 
 def build_outputs(
     canonical: dict[str, str],
-    skill_routes: list[tuple[str, str]],
+    playbook_routes: list[tuple[str, str]],
     playbooks: dict[str, str],
 ) -> dict[Path, str]:
     """出力ファイル群を生成する。"""
@@ -175,20 +174,19 @@ def build_outputs(
             source="docs/ai/canonical/*",
         ),
         OUTPUT_FILES["cursor_routing"]: build_cursor_rule(
-            "タスク別のSkillルーティング",
+            "タスク別のPlaybookルーティング",
             cursor_routing,
             source="docs/ai/canonical/*",
         ),
         OUTPUT_FILES["cursor_playbooks"]: build_cursor_rule(
             "共通Playbook参照ルール",
-            build_cursor_playbooks_rule(skill_routes),
+            build_cursor_playbooks_rule(playbook_routes),
             source="docs/ai/canonical/playbooks/*",
         ),
     }
-    for skill_name, markdown in playbooks.items():
-        source = f"docs/ai/canonical/playbooks/{skill_name}.md"
-        outputs[PLAYBOOK_OUTPUT_DIR / f"{skill_name}.md"] = with_auto_header(markdown, source)
-        outputs[SKILL_DIR / skill_name / "SKILL.md"] = with_auto_header(markdown, source)
+    for playbook_name, markdown in playbooks.items():
+        source = f"docs/ai/canonical/playbooks/{playbook_name}.md"
+        outputs[PLAYBOOK_OUTPUT_DIR / f"{playbook_name}.md"] = with_auto_header(markdown, source)
     return outputs
 
 
@@ -234,10 +232,10 @@ def main() -> int:
     args = parse_args()
     root = Path(args.root).resolve()
     canonical = read_canonical(root)
-    skill_routes = extract_skill_routes(canonical["routing"])
-    skill_names = [skill_name for _, skill_name in skill_routes]
-    playbooks = read_canonical_playbooks(root, skill_names)
-    outputs = build_outputs(canonical, skill_routes, playbooks)
+    playbook_routes = extract_playbook_routes(canonical["routing"])
+    playbook_names = [playbook_name for _, playbook_name in playbook_routes]
+    playbooks = read_canonical_playbooks(root, playbook_names)
+    outputs = build_outputs(canonical, playbook_routes, playbooks)
 
     if args.check:
         drift = check_outputs(root, outputs)

@@ -1,6 +1,6 @@
 ---
 name: task-design-gate
-description: 実装前にタスク設計書を作成し、スコープ・前提・リスクをそろえたうえでユーザー承認を取得するためのスキル。実装・リファクタ・移行・デバッグなど、ファイル変更を伴う依頼で事前計画が必要なときに使う。
+description: 実装前にタスク設計書を作成し、スコープ・前提・リスクをそろえたうえでユーザー承認を取得するためのPlaybook。実装・リファクタ・移行・デバッグなど、ファイル変更を伴う依頼で事前計画が必要なときに使う。
 ---
 
 # タスク設計ゲート
@@ -9,7 +9,7 @@ description: 実装前にタスク設計書を作成し、スコープ・前提�
 
 1. 依頼内容を 1 文で言い換える。
 2. 関連コードと制約を調査する。
-3. `references/_task-design-template.md` を読み、テンプレートを埋める。
+3. `docs/ai/playbook-assets/task-design-gate/references/_task-design-template.md` を読み、テンプレートを埋める。
 4. 設計書を提示し、ユーザーに明示的な承認を求める。
 5. 承認が出るまで、実装ファイルの編集を開始しない。
 6. 承認NGまたは修正依頼があれば、設計書を更新して再確認する。
@@ -24,7 +24,7 @@ description: 実装前にタスク設計書を作成し、スコープ・前提�
 
 ## 出力ルール
 
-- `references/_task-design-template.md` の見出し順を厳守して Markdown で出力する。
+- `docs/ai/playbook-assets/task-design-gate/references/_task-design-template.md` の見出し順を厳守して Markdown で出力する。
 - 各セクションはリポジトリ固有の具体内容で記載し、一般論を避ける。
 - ファイルは必ず明示的なパスで列挙する。
 - 少なくとも 1 つ以上のリスクと検証手順を含める。
@@ -38,4 +38,4 @@ description: 実装前にタスク設計書を作成し、スコープ・前提�
 
 ## ハイブリッド運用（任意）
 
-この運用をプロジェクト全体に常時適用したい依頼があれば、`references/agents-md-snippet.md` を参照し、`AGENTS.md` への追記を提案する。
+この運用をプロジェクト全体に常時適用したい依頼があれば、`docs/ai/playbook-assets/task-design-gate/references/agents-md-snippet.md` を参照し、`AGENTS.md` への追記を提案する。

@@ -131,21 +131,21 @@ def build_agents_md(
 - 実装ファイルの編集は、設計書に対するユーザーの明示承認後にのみ許可する。
 - 実装中にスコープ変更が発生した場合、実装を停止して設計書を更新し、再承認を取得する。
 
-## Skill運用ルール
+## Playbook運用ルール
 
-- 既存スキルで対応できる場合は再利用を優先する。
-- CI 設定は必須とし、`$python-uv-ci-setup` を利用して完了させる。
-- API 仕様変更がある場合は `$api-spec-sync` を使って `docs/api/` と実装を同期する。
-- 実装前の設計ゲートは `$task-design-gate` を利用する。
-- コミット時は `$git-commit` を利用して規約を満たす。
-- AGENTS.md には方針とルーティングのみ記載し、詳細手順は各 Skill に集約する。
+- 既存 Playbook で対応できる場合は再利用を優先する。
+- CI 設定は必須とし、`python-uv-ci-setup` を利用して完了させる。
+- API 仕様変更がある場合は `api-spec-sync` を使って `docs/api/` と実装を同期する。
+- 実装前の設計ゲートは `task-design-gate` を利用する。
+- コミット時は `git-commit` を利用して規約を満たす。
+- AGENTS.md には方針とルーティングのみ記載し、詳細手順は各 Playbook に集約する。
 
-## Skill配置方針（チーム再現性）
-- 原則として新規作成は `.codex/skills` 同梱のテンプレートリポジトリから開始する。
-- 空リポジトリから開始する場合のみ、グローバル `$python-project-bootstrap` を初回1回だけ使用する。
-- 初回生成直後に共有 Skill を `<repo>/.codex/skills/` に配置してコミットし、以後は repo ローカルを正本にする。
-- 個人ホーム配下の Skill は補助用途とし、必須依存にしない。
-- 共有 Skill の更新は PR でレビューする。
+## Playbook配置方針（チーム再現性）
+- 原則として新規作成は Playbook 同梱のテンプレートリポジトリから開始する。
+- 空リポジトリから開始する場合のみ、グローバル `python-project-bootstrap` を初回1回だけ使用する。
+- 初回生成直後に手順正本を `<repo>/docs/ai/canonical/playbooks/` に配置してコミットし、以後は repo ローカルを正本にする。
+- 個人ホーム配下の Playbook は補助用途とし、必須依存にしない。
+- 共有 Playbook の更新は PR でレビューする。
 
 ## コードスタイル
 - 共通:
@@ -170,8 +170,8 @@ def build_agents_md(
 - `.env.keys` は秘密鍵を含むためコミットしない。
 
 ## CI / 品質ゲート
-- CI 設定は必須。`$python-uv-ci-setup` で `.pre-commit-config.yaml` と `.github/workflows/ci.yml` を整備する。
-- 実行コマンドや失敗時の復旧手順は `python-uv-ci-setup` Skill の記述を正本とする。
+- CI 設定は必須。`python-uv-ci-setup` で `.pre-commit-config.yaml` と `.github/workflows/ci.yml` を整備する。
+- 実行コマンドや失敗時の復旧手順は `docs/ai/playbooks/python-uv-ci-setup.md` の記述を正本とする。
 
 ## Git戦略: Git Worktree ワークフロー
 - ルートディレクトリで `git switch` や `git checkout` によるブランチ切り替えは禁止。

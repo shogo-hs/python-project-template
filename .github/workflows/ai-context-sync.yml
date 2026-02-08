@@ -4,20 +4,22 @@ on:
   pull_request:
     paths:
       - "docs/ai/canonical/**"
+      - "docs/ai/playbook-assets/**"
       - "docs/ai/playbooks/**"
+      - "scripts/playbooks/**"
       - "scripts/sync_ai_context.py"
       - "AGENTS.md"
       - ".cursor/rules/**"
-      - ".codex/skills/**/SKILL.md"
   push:
     branches: [main]
     paths:
       - "docs/ai/canonical/**"
+      - "docs/ai/playbook-assets/**"
       - "docs/ai/playbooks/**"
+      - "scripts/playbooks/**"
       - "scripts/sync_ai_context.py"
       - "AGENTS.md"
       - ".cursor/rules/**"
-      - ".codex/skills/**/SKILL.md"
 
 jobs:
   check-sync:

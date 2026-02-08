@@ -1,4 +1,0 @@
-interface:
-  display_name: "Python uv CIセットアップ"
-  short_description: "uv前提でformat/lint/mypy/pytest/pre-commit/GitHub Actionsを一括設定する。"
-  default_prompt: "$python-uv-ci-setup を使って、uvのdependency-groupsで管理するPython品質ゲートとCIを設定してください。"

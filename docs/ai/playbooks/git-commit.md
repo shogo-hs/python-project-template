@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Gitの変更を安全にコミットするためのスキル。`git status` と `git diff` で差分を確認し、変更内容に合うプレフィックスを選んで日本語コミットメッセージ規約を満たしたうえで `git commit` を実行する必要があるときに使う。コミット実行依頼、コミットメッセージ作成依頼、コミット直前の最終確認で適用する。
+description: Gitの変更を安全にコミットするためのPlaybook。`git status` と `git diff` で差分を確認し、変更内容に合うプレフィックスを選んで日本語コミットメッセージ規約を満たしたうえで `git commit` を実行する必要があるときに使う。コミット実行依頼、コミットメッセージ作成依頼、コミット直前の最終確認で適用する。
 ---
 
 <!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->

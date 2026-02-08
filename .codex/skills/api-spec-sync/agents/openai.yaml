@@ -1,4 +1,0 @@
-interface:
-  display_name: "API定義書同期"
-  short_description: "実装差分とAPI定義書を同時更新して整合性を維持する。"
-  default_prompt: "$api-spec-sync を使ってAPI実装差分を確認し、indexとエンドポイント詳細を同期更新してください。"

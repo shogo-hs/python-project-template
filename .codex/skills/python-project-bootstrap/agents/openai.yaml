@@ -1,4 +1,0 @@
-interface:
-  display_name: "Pythonプロジェクト初期構築"
-  short_description: "Python新規開発の初期構成と運用文書を対話生成する。"
-  default_prompt: "$python-project-bootstrap を使って、AGENTS.mdを対話で確定し、Hexagonal構成・dotenvx・必須CI設定まで含む初期セットアップを実施してください。"
