@@ -20,6 +20,21 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 └── .github/workflows/ai-context-sync.yml
 ```
 
+## 同梱Skill一覧（repoローカル正本）
+
+テンプレートには以下の Skill を同梱している。運用時の正本は常に `<repo>/.codex/skills/` とする。
+
+- `python-project-bootstrap`
+- `python-uv-ci-setup`
+- `task-design-gate`
+- `api-spec-sync`
+- `git-commit`
+
+更新方針:
+
+- global 側 Skill を更新した場合も、必要な差分はこのテンプレート側へ取り込み、PR でレビューしてから反映する。
+- 参照のみを増やして実体を同梱しない運用は避ける（新規環境で参照切れを起こすため）。
+
 ## 運用ルール
 
 1. ルール変更は `docs/ai/canonical/` だけを編集する。

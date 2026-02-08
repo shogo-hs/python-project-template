@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gitコミット実行"
+  short_description: "変更内容を確認し、規約準拠の日本語メッセージでgit commitを実行する。"
+  default_prompt: "$git-commit を使って差分を確認し、prefix付き50文字以内の日本語メッセージでコミットしてください。"

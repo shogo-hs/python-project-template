@@ -1,0 +1,4 @@
+interface:
+  display_name: "タスク設計ゲート"
+  short_description: "実装前に設計書で認識合わせを必須化する。"
+  default_prompt: "$task-design-gate を使ってタスク設計書を作成し、承認取得後にのみ実装へ進んでください。"
