@@ -36,7 +36,14 @@ description: 新しい Python プロジェクトの初期セットアップを�
 - 未確定項目は既定値を勝手に固定せず、ユーザー確認を優先する。
 - 既定値を使う場合は「既定値を採用した」と明示してから確定する。
 
-3. プロダクト方針（docs/product）を対話で初期確定する。
+3. 初期構成を生成する。
+- `scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py` を実行して、ディレクトリと初期ドキュメントを生成する。
+- 例:
+  - `python3 scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py --target <project-root> --project-name <name> --package-name <package_name> --description "<description>"`
+- 必要に応じて `--task-design-dir docs/task-designs`（既定）や `--force` を使う。
+- 生成後に手順正本を `<repo>/docs/ai/canonical/playbooks/` に配置してコミットし、以後の実行基盤を repo ローカルへ固定する。
+
+4. プロダクト方針（docs/product）を対話で初期確定する。
 - `docs/ai/playbook-assets/python-project-bootstrap/references/product-docs-alignment.md` を使い、1〜3問ずつ擦り合わせる。
 - 最低限、次を埋める。
   - `docs/product/vision.md`: 対象ユーザー、解く課題、成功状態
@@ -44,13 +51,6 @@ description: 新しい Python プロジェクトの初期セットアップを�
   - `docs/product/milestones.md`: 到達ステップ
   - `docs/product/progress.md`: やるべきこと一覧ベースの現在地
 - 不確定項目が残る場合は、`仮置き` と明記して次の確認タイミングを残す。
-
-4. 初期構成を生成する。
-- `scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py` を実行して、ディレクトリと初期ドキュメントを生成する。
-- 例:
-  - `python3 scripts/playbooks/python-project-bootstrap/bootstrap_python_project.py --target <project-root> --project-name <name> --package-name <package_name> --description "<description>"`
-- 必要に応じて `--task-design-dir docs/task-designs`（既定）や `--force` を使う。
-- 生成後に手順正本を `<repo>/docs/ai/canonical/playbooks/` に配置してコミットし、以後の実行基盤を repo ローカルへ固定する。
 
 5. 生成内容をレビューする。
 - `docs/ai/playbook-assets/python-project-bootstrap/references/project-structure.md` を基準に、`adapters/application/domain/ports` の責務分離を確認する。
