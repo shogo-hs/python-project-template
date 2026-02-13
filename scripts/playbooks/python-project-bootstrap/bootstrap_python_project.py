@@ -150,6 +150,11 @@ def build_agents_md(
 - タスク設計テンプレート: `{task_template}`
 - APIテンプレート: `docs/api/_endpoint_template.md`
 - API一覧: `docs/api/index.md`
+- プロダクト方針:
+  - `docs/product/vision.md`
+  - `docs/product/goals.md`
+  - `docs/product/milestones.md`
+  - `docs/product/progress.md`
 
 ## Task Design Gate (Mandatory)
 
@@ -160,6 +165,7 @@ def build_agents_md(
 - 設計書に未解消のオープン事項がある間は実装を開始しない。
 - 実装ファイルの編集は、設計書に対するユーザーの明示承認後にのみ許可する。
 - 実装中にスコープ変更が発生した場合、実装を停止して設計書を更新し、再承認を取得する。
+- 新規プロダクト開発の開始前に、`docs/product/*.md` をユーザーと擦り合わせて初期確定する。
 
 ## Playbook運用ルール
 
@@ -346,6 +352,121 @@ src/{package_name}/
 """
 
 
+def build_product_vision_template() -> str:
+    """プロダクトビジョンの初期テンプレートを返す。"""
+    return """# プロダクトビジョン
+
+最終更新: <YYYY-MM-DD>
+
+## 1. Vision Statement
+
+<このプロダクトが最終的に実現したい状態を1〜2文で記述する。>
+
+## 2. 対象ユーザー
+
+- <最優先ユーザー1>
+- <最優先ユーザー2>
+
+## 3. 解決する課題
+
+- <課題1>
+- <課題2>
+
+## 4. 提供価値
+
+- <価値1>
+- <価値2>
+
+## 5. 成功状態
+
+- <どの状態になれば「価値提供できた」と判断するか>
+
+## 6. Vision の再設定ルール
+
+- <どの条件で Vision を見直すか>
+
+## 7. 関連ドキュメント
+
+- ユーザー到達状態ゴール: `docs/product/goals.md`
+- 到達ステップ: `docs/product/milestones.md`
+- 現在地スコアボード: `docs/product/progress.md`
+"""
+
+
+def build_product_goals_template() -> str:
+    """ユーザー到達状態ゴールの初期テンプレートを返す。"""
+    return """# ユーザー到達状態ゴール
+
+最終更新: <YYYY-MM-DD>
+
+## ゴール一覧
+
+| Goal ID | ユーザーが到達したい状態 | 到達判定（Definition of Done） | 状態 |
+| --- | --- | --- | --- |
+| G-01 | <到達状態1> | <判定条件1> | Planned |
+| G-02 | <到達状態2> | <判定条件2> | Planned |
+| G-03 | <到達状態3> | <判定条件3> | Planned |
+
+## 運用ルール
+
+- ゴールは 3〜5 個に絞る。
+- 各ゴールは必ず「ユーザーが到達したい状態」で書く。
+- 各ゴールに `到達判定（Definition of Done）` を 1 つ以上持たせる。
+"""
+
+
+def build_product_milestones_template() -> str:
+    """到達ステップの初期テンプレートを返す。"""
+    return """# 到達ステップ
+
+最終更新: <YYYY-MM-DD>
+
+## ステップ一覧
+
+| Milestone ID | 対応 Goal ID | 到達ステップ | 完了条件 | 状態 |
+| --- | --- | --- | --- | --- |
+| M-01 | G-01 | <ステップ1> | <完了条件1> | Planned |
+| M-02 | G-02 | <ステップ2> | <完了条件2> | Planned |
+| M-03 | G-03 | <ステップ3> | <完了条件3> | Planned |
+
+## 運用ルール
+
+- マイルストーンは時期ではなく「到達ステップ」として管理する。
+- 各マイルストーンは必ず Goal ID に紐づける。
+- 完了したマイルストーンは削除せず、状態を `Done` に更新して履歴を残す。
+"""
+
+
+def build_product_progress_template() -> str:
+    """進捗スコアボードの初期テンプレートを返す。"""
+    return """# 進捗スコアボード
+
+最終更新: <YYYY-MM-DD>
+
+## 更新ルール
+
+- 更新頻度: 状態変化があったタイミングで更新する。
+- 更新者: 該当 Goal に紐づくタスク設計を更新した担当者。
+- 記載単位: Goal ID 単位。
+- 進捗表示: `%` は使わず、「やるべきこと一覧」「完了済み」「未完了」「現在地」で記録する。
+
+## Goal別進捗
+
+### G-01: <ゴール名>
+
+**やるべきこと一覧**
+
+| Item ID | やるべきこと | 状態 | 根拠 |
+| --- | --- | --- | --- |
+| G01-I01 | <やるべきこと1> | Planned | <関連ファイル/リンク> |
+| G01-I02 | <やるべきこと2> | Planned | <関連ファイル/リンク> |
+
+- 完了済み: <Item IDの列挙>
+- 未完了: <Item IDの列挙>
+- 現在地: <現状を1文で記述>
+"""
+
+
 def build_task_readme(task_design_dir: str) -> str:
     """タスク設計ディレクトリ README を返す。"""
     return f"""# タスク設計書の保存先
@@ -394,6 +515,8 @@ def build_task_template() -> str:
 - 対象コンポーネント: <backend / frontend / docs / infra / data>
 - 関連: <リンクや関連設計書>
 - チケット/リンク: <Issue/PR/外部リンク>
+- 関連ゴールID: <G-01 など。該当なしの場合は `該当なし`>
+- 関連マイルストーンID: <M-01 など。該当なしの場合は `該当なし`>
 
 ## 0. TL;DR
 - <目的と結論を3〜5行で要約>
@@ -736,6 +859,7 @@ def main() -> None:
         target / "docs" / "rules" / "code_architecture",
         target / "docs" / "architecture",
         target / "docs" / "api",
+        target / "docs" / "product",
         target / Path(task_design_dir),
     ]
     ensure_directories(directories, report)
@@ -754,6 +878,10 @@ def main() -> None:
         target / Path(task_design_dir) / "_task-design-template.md": build_task_template(),
         target / "docs" / "api" / "index.md": build_api_index(),
         target / "docs" / "api" / "_endpoint_template.md": build_api_endpoint_template(),
+        target / "docs" / "product" / "vision.md": build_product_vision_template(),
+        target / "docs" / "product" / "goals.md": build_product_goals_template(),
+        target / "docs" / "product" / "milestones.md": build_product_milestones_template(),
+        target / "docs" / "product" / "progress.md": build_product_progress_template(),
         target / ".env.development": build_env_file("development"),
         target / ".env.production": build_env_file("production"),
     }
