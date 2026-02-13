@@ -27,6 +27,10 @@ API_ENDPOINT_TEMPLATE_PATH = (
     / "references"
     / "_endpoint_template.md"
 )
+PRODUCT_VISION_TEMPLATE_PATH = REPO_ROOT / "docs" / "product" / "vision.md"
+PRODUCT_GOALS_TEMPLATE_PATH = REPO_ROOT / "docs" / "product" / "goals.md"
+PRODUCT_MILESTONES_TEMPLATE_PATH = REPO_ROOT / "docs" / "product" / "milestones.md"
+PRODUCT_PROGRESS_TEMPLATE_PATH = REPO_ROOT / "docs" / "product" / "progress.md"
 
 
 def load_template(path: Path, fallback: str) -> str:
@@ -354,117 +358,38 @@ src/{package_name}/
 
 def build_product_vision_template() -> str:
     """プロダクトビジョンの初期テンプレートを返す。"""
-    return """# プロダクトビジョン
+    fallback = """# プロダクトビジョン
 
 最終更新: <YYYY-MM-DD>
-
-## 1. Vision Statement
-
-<このプロダクトが最終的に実現したい状態を1〜2文で記述する。>
-
-## 2. 対象ユーザー
-
-- <最優先ユーザー1>
-- <最優先ユーザー2>
-
-## 3. 解決する課題
-
-- <課題1>
-- <課題2>
-
-## 4. 提供価値
-
-- <価値1>
-- <価値2>
-
-## 5. 成功状態
-
-- <どの状態になれば「価値提供できた」と判断するか>
-
-## 6. Vision の再設定ルール
-
-- <どの条件で Vision を見直すか>
-
-## 7. 関連ドキュメント
-
-- ユーザー到達状態ゴール: `docs/product/goals.md`
-- 到達ステップ: `docs/product/milestones.md`
-- 現在地スコアボード: `docs/product/progress.md`
 """
+    return load_template(PRODUCT_VISION_TEMPLATE_PATH, fallback)
 
 
 def build_product_goals_template() -> str:
     """ユーザー到達状態ゴールの初期テンプレートを返す。"""
-    return """# ユーザー到達状態ゴール
+    fallback = """# ユーザー到達状態ゴール
 
 最終更新: <YYYY-MM-DD>
-
-## ゴール一覧
-
-| Goal ID | ユーザーが到達したい状態 | 到達判定（Definition of Done） | 状態 |
-| --- | --- | --- | --- |
-| G-01 | <到達状態1> | <判定条件1> | Planned |
-| G-02 | <到達状態2> | <判定条件2> | Planned |
-| G-03 | <到達状態3> | <判定条件3> | Planned |
-
-## 運用ルール
-
-- ゴールは 3〜5 個に絞る。
-- 各ゴールは必ず「ユーザーが到達したい状態」で書く。
-- 各ゴールに `到達判定（Definition of Done）` を 1 つ以上持たせる。
 """
+    return load_template(PRODUCT_GOALS_TEMPLATE_PATH, fallback)
 
 
 def build_product_milestones_template() -> str:
     """到達ステップの初期テンプレートを返す。"""
-    return """# 到達ステップ
+    fallback = """# 到達ステップ
 
 最終更新: <YYYY-MM-DD>
-
-## ステップ一覧
-
-| Milestone ID | 対応 Goal ID | 到達ステップ | 完了条件 | 状態 |
-| --- | --- | --- | --- | --- |
-| M-01 | G-01 | <ステップ1> | <完了条件1> | Planned |
-| M-02 | G-02 | <ステップ2> | <完了条件2> | Planned |
-| M-03 | G-03 | <ステップ3> | <完了条件3> | Planned |
-
-## 運用ルール
-
-- マイルストーンは時期ではなく「到達ステップ」として管理する。
-- 各マイルストーンは必ず Goal ID に紐づける。
-- 完了したマイルストーンは削除せず、状態を `Done` に更新して履歴を残す。
 """
+    return load_template(PRODUCT_MILESTONES_TEMPLATE_PATH, fallback)
 
 
 def build_product_progress_template() -> str:
     """進捗スコアボードの初期テンプレートを返す。"""
-    return """# 進捗スコアボード
+    fallback = """# 進捗スコアボード
 
 最終更新: <YYYY-MM-DD>
-
-## 更新ルール
-
-- 更新頻度: 状態変化があったタイミングで更新する。
-- 更新者: 該当 Goal に紐づくタスク設計を更新した担当者。
-- 記載単位: Goal ID 単位。
-- 進捗表示: `%` は使わず、「やるべきこと一覧」「完了済み」「未完了」「現在地」で記録する。
-
-## Goal別進捗
-
-### G-01: <ゴール名>
-
-**やるべきこと一覧**
-
-| Item ID | やるべきこと | 状態 | 根拠 |
-| --- | --- | --- | --- |
-| G01-I01 | <やるべきこと1> | Planned | <関連ファイル/リンク> |
-| G01-I02 | <やるべきこと2> | Planned | <関連ファイル/リンク> |
-
-- 完了済み: <Item IDの列挙>
-- 未完了: <Item IDの列挙>
-- 現在地: <現状を1文で記述>
 """
+    return load_template(PRODUCT_PROGRESS_TEMPLATE_PATH, fallback)
 
 
 def build_task_readme(task_design_dir: str) -> str:
