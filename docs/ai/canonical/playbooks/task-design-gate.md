@@ -25,6 +25,7 @@ description: 実装前にタスク設計書を作成し、スコープ・前提�
 ## 出力ルール
 
 - `docs/ai/playbook-assets/task-design-gate/references/_task-design-template.md` の見出し順を厳守して Markdown で出力する。
+- タスク設計書のメタデータには、`関連ゴールID` と `関連マイルストーンID` を必ず記載する。
 - 各セクションはリポジトリ固有の具体内容で記載し、一般論を避ける。
 - ファイルは必ず明示的なパスで列挙する。
 - 少なくとも 1 つ以上のリスクと検証手順を含める。

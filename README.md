@@ -19,6 +19,7 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 ├── docs/ai/canonical/playbooks/*.md      # Playbook手順の正本（手動編集）
 ├── docs/ai/playbooks/*.md                # 自動生成（実行時の参照先）
 ├── docs/ai/playbook-assets/**            # 参照資料（手動編集）
+├── docs/product/*.md                     # プロダクト方針・目標・進捗の正本（手動編集）
 ├── scripts/playbooks/**                  # 補助スクリプト（手動編集）
 ├── scripts/sync_ai_context.py            # 生成/検証
 ├── scripts/bootstrap_after_canonical.py  # 同期後ブートストラップ
@@ -39,6 +40,19 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 - ルール本文は `docs/ai/canonical/` と `docs/ai/canonical/playbooks/` だけを編集する。
 - `docs/ai/playbooks/*.md`、`AGENTS.md`、`.cursor/rules/*.mdc` は自動生成物として直接編集しない。
 - Playbook の参照資料は `docs/ai/playbook-assets/`、補助スクリプトは `scripts/playbooks/` を正本とする。
+
+## プロダクト方針と進捗管理
+
+- プロダクト方針の正本は `docs/product/` に置く。
+- 各タスク設計は `関連ゴールID` / `関連マイルストーンID` を明記し、日々の実装を中長期目標へ接続する。
+- テンプレート利用開始時は、`python-project-bootstrap` の初期対話で `docs/product/*.md` をユーザーと擦り合わせて埋める。
+
+`docs/product/` の役割:
+
+- `docs/product/vision.md`: 最終的に目指す状態、対象ユーザー、再設定ルール
+- `docs/product/goals.md`: ユーザー到達状態ゴール（Goal ID）と到達判定
+- `docs/product/milestones.md`: 到達ステップ（Milestone ID）
+- `docs/product/progress.md`: やるべきこと一覧、完了済み、未完了、現在地
 
 ## README と AGENTS の書き分け
 
