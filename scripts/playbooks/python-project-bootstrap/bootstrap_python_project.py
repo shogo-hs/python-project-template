@@ -101,6 +101,9 @@ def ensure_gitignore(target: Path, report: dict[str, list[str]]) -> None:
         ".pytest_cache/",
         ".mypy_cache/",
         ".ruff_cache/",
+        ".coverage",
+        "htmlcov/",
+        "coverage.xml",
         ".worktrees/",
     ]
     gitignore_path = target / ".gitignore"
@@ -298,10 +301,10 @@ def build_code_architecture_rules(package_name: str) -> str:
 
 ## 依存方向
 
-- `src/{package_name}/adapters` -> `src/{package_name}/application`
-- `src/{package_name}/application` -> `src/{package_name}/domain`
+- `adapters` -> `application` -> `ports` -> `domain` の順に外側から内側へだけ import できる。
 - `src/{package_name}/ports` は契約のみを保持し、実装は持たない。
-- `domain` は外部ライブラリ・フレームワークへ依存しない。
+- `domain` と `ports` は外部ライブラリ・フレームワークへ依存しない。
+- 依存方向は import-linter（`uv run lint-imports`）で検証する。契約は `pyproject.toml` の `[tool.importlinter]` にある。
 
 ## 層責務
 
@@ -714,6 +717,28 @@ curl -X <METHOD> '<BASE_URL><PATH>' \
     return load_template(API_ENDPOINT_TEMPLATE_PATH, fallback)
 
 
+def build_smoke_test(package_name: str) -> str:
+    """パッケージが import できることを確かめる smoke テストを返す。
+
+    生成直後のプロジェクトでも pytest が「テスト 0 件」で失敗せず、
+    `src/` 配下のパッケージが解決できることを CI で確認できるようにする。
+
+    Args:
+        package_name: `src/` 配下のパッケージ名。
+
+    Returns:
+        `tests/unit/test_smoke.py` の内容。
+    """
+    return f'''"""パッケージが import できることを確かめる smoke テスト。"""
+
+import importlib
+
+
+def test_package_is_importable() -> None:
+    assert importlib.import_module("{package_name}")
+'''
+
+
 def build_env_file(environment: str) -> str:
     """環境別 .env テンプレートを返す。"""
     suffix = environment.upper()
@@ -789,7 +814,19 @@ def main() -> None:
     ]
     ensure_directories(directories, report)
 
+    # src/<package> と tests/ の配下は全部 Python パッケージにする（__init__.py を置く）。
+    # 無いと import-linter が層を見つけられず、mypy / pytest も src 配下を解決できない。
+    package_roots = (target / "src" / package_name, target / "tests")
+    package_dirs: set[Path] = set(package_roots)
+    for path in directories:
+        for root in package_roots:
+            if path.is_relative_to(root):
+                package_dirs.update(p for p in [path, *path.parents] if p.is_relative_to(root))
+    init_files = {path / "__init__.py": "" for path in sorted(package_dirs)}
+
     files = {
+        **init_files,
+        target / "tests" / "unit" / "test_smoke.py": build_smoke_test(package_name),
         target / "AGENTS.md": build_agents_md(
             project_name=args.project_name,
             description=args.description,
