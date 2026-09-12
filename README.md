@@ -1,11 +1,11 @@
-# codex-cursor-python-template
+# python-project-template
 
-Codex と Cursor を併用する Python プロジェクト向けのテンプレート。
+Codex / Cursor / Claude Code を併用する Python プロジェクト向けのテンプレート。
 
 ## 目的
 
 - AI 向け運用ルールの二重管理を防ぐ。
-- `AGENTS.md`（Codex）と `.cursor/rules/*.mdc`（Cursor）を同じ正本から生成する。
+- `AGENTS.md`（Codex）、`.cursor/rules/*.mdc`（Cursor）、`CLAUDE.md` と `.claude/skills/*/SKILL.md`（Claude Code）を同じ正本から生成する。
 - 手順本文を `docs/ai/canonical/playbooks/` に集約し、実行時は `docs/ai/playbooks/*.md` を参照する。
 - 参照資料と補助スクリプトを repo 同梱で管理し、チーム再現性を確保する。
 
@@ -15,6 +15,8 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 .
 ├── AGENTS.md                             # 自動生成
 ├── .cursor/rules/*.mdc                   # 自動生成
+├── CLAUDE.md                             # 自動生成（@AGENTS.md を取り込む 1 行）
+├── .claude/skills/*/SKILL.md             # 自動生成（Playbook を Claude Code のスキルとして配布）
 ├── docs/ai/canonical/*.md                # 正本（手動編集）
 ├── docs/ai/canonical/playbooks/*.md      # Playbook手順の正本（手動編集）
 ├── docs/ai/playbooks/*.md                # 自動生成（実行時の参照先）
@@ -38,7 +40,7 @@ Codex と Cursor を併用する Python プロジェクト向けのテンプレ�
 ## 更新方針
 
 - ルール本文は `docs/ai/canonical/` と `docs/ai/canonical/playbooks/` だけを編集する。
-- `docs/ai/playbooks/*.md`、`AGENTS.md`、`.cursor/rules/*.mdc` は自動生成物として直接編集しない。
+- `docs/ai/playbooks/*.md`、`AGENTS.md`、`.cursor/rules/*.mdc`、`CLAUDE.md`、`.claude/skills/*/SKILL.md` は自動生成物として直接編集しない。
 - Playbook の参照資料は `docs/ai/playbook-assets/`、補助スクリプトは `scripts/playbooks/` を正本とする。
 
 ## プロダクト方針と進捗管理
@@ -128,8 +130,11 @@ python3 scripts/sync_ai_context.py --check
 - 理由: OS/Git 設定差（例: `core.symlinks`）でチーム運用が不安定になりうるため。
 - 必要な場合のみローカル実験として利用し、チーム標準は同期スクリプト方式を維持する。
 
-## Codex + Cursor 併用ポリシー
+## Codex + Cursor + Claude Code 併用ポリシー
 
-- 実行導線は `AGENTS.md` と `.cursor/rules/*.mdc` に統一する。
+- 実行導線は `AGENTS.md`、`.cursor/rules/*.mdc`、`CLAUDE.md` に統一する。
+- Claude Code は `AGENTS.md` を読まないため、`CLAUDE.md` は `@AGENTS.md` の 1 行で同じ規約を取り込む。Claude 固有の指示を足したい場合も `CLAUDE.md` を直接編集せず、正本に書いて再生成する。
+- Playbook は `.claude/skills/<playbook>/SKILL.md` として配布され、`/task-design-gate` のように呼べるほか、依頼内容に応じて Claude が自動で選ぶ。
+- Playbook 内のパスはリポジトリルート基準なので、Claude Code はリポジトリルートで起動する。
 - 詳細手順は `docs/ai/playbooks/*.md` を共通参照先にする。
 - 正本更新後は必ず `sync_ai_context.py` で再生成し、`--check` を通す。

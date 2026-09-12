@@ -13,5 +13,6 @@
 
 - AGENTS.md には「いつどの Playbook を使うか」を書き、実行時はリンク先ドキュメントを参照する。
 - 詳細手順の正本は `docs/ai/canonical/playbooks/*.md` に集約し、`scripts/sync_ai_context.py` で `docs/ai/playbooks/*.md` へ配布する。
+- Claude Code へは同じスクリプトで `CLAUDE.md`（`@AGENTS.md` を取り込む 1 行）と `.claude/skills/<playbook>/SKILL.md` を配布する。
 - 参照資料は `docs/ai/playbook-assets/`、補助スクリプトは `scripts/playbooks/` に集約する。
 - 同じ手順を AGENTS.md と Playbook に重複記載しない。

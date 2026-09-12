@@ -10,6 +10,8 @@ on:
       - "scripts/sync_ai_context.py"
       - "AGENTS.md"
       - ".cursor/rules/**"
+      - "CLAUDE.md"
+      - ".claude/skills/**"
   push:
     branches: [main]
     paths:
@@ -20,6 +22,8 @@ on:
       - "scripts/sync_ai_context.py"
       - "AGENTS.md"
       - ".cursor/rules/**"
+      - "CLAUDE.md"
+      - ".claude/skills/**"
 
 jobs:
   check-sync:
