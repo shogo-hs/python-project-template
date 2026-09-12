@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""canonical から AGENTS.md / Cursor rules / Playbooks を生成・検証する。"""
+"""canonical から AGENTS.md / CLAUDE.md / Cursor rules / Claude Code skills / Playbooks を生成・検証する。"""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ CANONICAL_FILES = {
 
 OUTPUT_FILES = {
     "agents": Path("AGENTS.md"),
+    "claude": Path("CLAUDE.md"),
     "cursor_global": Path(".cursor/rules/00-global.mdc"),
     "cursor_routing": Path(".cursor/rules/10-task-routing.mdc"),
     "cursor_playbooks": Path(".cursor/rules/20-playbooks.mdc"),
@@ -22,6 +23,7 @@ OUTPUT_FILES = {
 
 PLAYBOOK_CANONICAL_DIR = Path("docs/ai/canonical/playbooks")
 PLAYBOOK_OUTPUT_DIR = Path("docs/ai/playbooks")
+SKILL_OUTPUT_DIR = Path(".claude/skills")
 
 AUTO_GENERATED_NOTICE = "<!-- AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY. -->\n"
 FRONTMATTER_PATTERN = re.compile(r"\A---\n.*?\n---\n?", re.DOTALL)
@@ -144,6 +146,18 @@ def build_agents(canonical: dict[str, str]) -> str:
     )
 
 
+def build_claude() -> str:
+    """CLAUDE.md の内容を生成する。
+
+    Claude Code は AGENTS.md を自動では読まないため、公式が推奨する
+    ``@AGENTS.md`` インポート 1 行で同じ規約を読ませる。
+
+    Returns:
+        自動生成ヘッダと ``@AGENTS.md`` だけからなる CLAUDE.md 本文。
+    """
+    return auto_header("AGENTS.md") + "\n@AGENTS.md\n"
+
+
 def build_cursor_rule(description: str, body: str, source: str) -> str:
     """Cursor rule (.mdc) の内容を生成する。"""
     return (
@@ -196,6 +210,7 @@ def build_outputs(
 
     outputs: dict[Path, str] = {
         OUTPUT_FILES["agents"]: build_agents(canonical),
+        OUTPUT_FILES["claude"]: build_claude(),
         OUTPUT_FILES["cursor_global"]: build_cursor_rule(
             "プロジェクト共通ポリシーと標準",
             cursor_global,
@@ -214,7 +229,11 @@ def build_outputs(
     }
     for playbook_name, markdown in playbooks.items():
         source = f"docs/ai/canonical/playbooks/{playbook_name}.md"
-        outputs[PLAYBOOK_OUTPUT_DIR / f"{playbook_name}.md"] = with_auto_header(markdown, source)
+        generated = with_auto_header(markdown, source)
+        outputs[PLAYBOOK_OUTPUT_DIR / f"{playbook_name}.md"] = generated
+        # canonical playbook の frontmatter は name/description の SKILL.md 形式なので、
+        # Claude Code のスキルとしてそのまま配布する（ディレクトリ名 = /コマンド名）。
+        outputs[SKILL_OUTPUT_DIR / playbook_name / "SKILL.md"] = generated
     return outputs
 
 
