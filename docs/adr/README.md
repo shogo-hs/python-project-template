@@ -29,3 +29,5 @@
 ## ADR 一覧
 
 - [0001: ADR運用を導入して設計判断を記録する](./0001-record-architecture-decisions.md) - 承認済み(accepted)
+- [0002: Hexagonal の依存方向を import-linter で機械検証する](./0002-enforce-hexagonal-dependencies-with-import-linter.md) - 承認済み(accepted)
+- [0003: CI の品質ゲートを ruff / mypy / pytest の 3 本から 6 本へ拡充する](./0003-expand-ci-quality-gates.md) - 承認済み(accepted)
