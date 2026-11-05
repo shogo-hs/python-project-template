@@ -28,9 +28,3 @@
 ## 6. Vision の再設定ルール
 
 - <どの条件で Vision を見直すか>
-
-## 7. 関連ドキュメント
-
-- ユーザー到達状態ゴール: `docs/product/goals.md`
-- 到達ステップ: `docs/product/milestones.md`
-- 現在地スコアボード: `docs/product/progress.md`
