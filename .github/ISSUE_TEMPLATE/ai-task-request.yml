@@ -23,7 +23,7 @@ body:
     attributes:
       label: スコープ
       description: 変更対象のファイル・ディレクトリ・機能
-      placeholder: 例) docs/ai/canonical/*, scripts/sync_ai_context.py
+      placeholder: 例) src/your_project/application/*, AGENTS.md
     validations:
       required: true
 
@@ -41,7 +41,7 @@ body:
     attributes:
       label: 受け入れ基準
       description: 完了判定の条件
-      placeholder: 例) sync --checkが通る、AGENTSに方針が反映される
+      placeholder: 例) CI の品質ゲートがすべて通る、AGENTS.md に方針が反映される
     validations:
       required: true
 
@@ -51,8 +51,7 @@ body:
       label: 検証コマンド
       description: 実行してほしいコマンドがあれば記載
       placeholder: |
-        python3 scripts/sync_ai_context.py
-        python3 scripts/sync_ai_context.py --check
+        uv run pytest -q
     validations:
       required: false
 
@@ -60,7 +59,7 @@ body:
     id: references
     attributes:
       label: 参照資料
-      description: 関連リンク、設計書、ADRなど
-      placeholder: 例) docs/task-designs/..., docs/adr/...
+      description: 関連リンク、ADRなど
+      placeholder: 例) docs/adr/...
     validations:
       required: false
