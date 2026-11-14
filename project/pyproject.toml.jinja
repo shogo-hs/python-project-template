@@ -9,8 +9,12 @@ dependencies = []
 requires = ["uv_build>=0.13.7,<0.14"]
 build-backend = "uv_build"
 
+[tool.uv.build-backend]
+# パッケージ名がプロジェクト名から作った名前と違っても、uv_build が src/ の下を見つけられるように明示する
+module-name = "{{ package_name }}"
+
 [tool.uv]
-# ロックファイルとフックの uv の版がずれないように下限をそろえる
+# 手元の uv が古すぎると uv.lock の形が変わるので、下限を決める（0.10.7 で確かめた）
 required-version = ">=0.10.7"
 
 [dependency-groups]
@@ -42,7 +46,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.mccabe]
-# 分岐の多い関数を CI で止める（ADR 0007）。上げるときは理由を ADR に残す
+# 分岐の多い関数を CI で止める（テンプレート ADR 0007）。上げるときは理由を ADR に残す
 max-complexity = 10
 
 [tool.ruff.lint.pydocstyle]

@@ -50,7 +50,7 @@ jobs:
       - name: Pytest
         run: uv run pytest -q
 
-  # PR ごとに、増えた・消えた関数と依存の増減をレビューする人にコメントで出す（ADR 0007）
+  # PR ごとに、増えた・消えた関数と依存の増減をレビューする人にコメントで出す（テンプレート ADR 0007）
   code-graph:
     # fork からの PR はトークンが読み取り専用でコメントを書けないので走らせない
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

@@ -7,15 +7,15 @@
 - 生成先に写るのは `project/` の中だけ（`copier.yml` の `_subdirectory`）。生成先の利用者が使う文書・設定・コードは `project/` に置く。
 - テンプレート自身のもの（この AGENTS.md、`README.md`、`docs/adr/` のテンプレート ADR、`.github/` のテンプレートの CI）は根に置き、`project/` に入れない。
 - `project/` の中で描画されるのは `.jinja` の付いたファイルと、`{{ }}` を含むパス名だけ。GitHub Actions の `${{ }}` を含むファイルに `.jinja` を付けない。
-- 生成先のチームが書き換えるファイルは、`copier.yml` の `_skip_if_exists` に入れる（update で上書きしない）。新しくそういうファイルを足したら、ここにも足す。
+- 生成先のチームが書き換えるファイルは、`copier.yml` の `_skip_if_exists` と、`_exclude` の update のときだけの行の両方に入れる（既存のプロジェクトへの copy で上書きせず、update で扱わない）。足したら、根の README とテンプレート ADR 0008 の一覧も直す。
 
 ## 変えたあとの確かめ方
 
 - PR の版から生成して、品質ゲートを流す。テンプレートの CI と同じ手順:
 
   ```bash
-  uvx copier copy --vcs-ref HEAD --defaults -d project_name=try-sample . /tmp/try-sample
-  cd /tmp/try-sample && git init -q && git add -A && uv lock && uv sync --locked --dev
+  uvx --from copier==9.19.1 copier copy --vcs-ref HEAD --defaults -d project_name=try-sample . /tmp/try-sample
+  cd /tmp/try-sample && git init -q -b main && git add -A && uv lock && uv sync --locked --dev
   uv run pre-commit run --all-files && uv run pytest -q
   ```
 

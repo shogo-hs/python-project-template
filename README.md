@@ -38,14 +38,20 @@ uvx copier check-update      # 新しい版があるかを見る
 uvx copier update --defaults # 作業ツリーが空の状態で流す。衝突は <<<<<<< の印か .rej のファイルで出る
 ```
 
-README・vision.md・ADR の 0001 と 0002・`.env.example`・smoke テスト・Issue のテンプレートはチームのもので、更新では触らない。それ以外（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml）はテンプレートに追従する。
+README・vision.md・`docs/adr/`（README・0001・0002）・`.env.example`・smoke テスト・Issue のテンプレートはチームのもので、更新では扱わない（消してあっても作り直さない）。それ以外（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml・PR のテンプレート）はテンプレートに追従する。
 
 ## 既にあるプロジェクトに入れる
 
 テンプレートから作っていないプロジェクトや、copier に移る前（v1.0.0 より前）にこのテンプレートから作ったプロジェクトに入れるときは、上書きしてから差分を選び戻す。
 
+copier に移る前のテンプレートから作ったプロジェクトでは、先に旧テンプレートから来たものを消す。消さないと、旧テンプレートの ADR 0001〜0007 と廃止した手順書が残り、ADR 0002 が 2 本並ぶ（どれも `git diff` には出ない）。チームが自分で書いた ADR（0008 以降など）は残す。
+
 ```bash
 git switch -c chore/adopt-template          # 作業ツリーが空の状態から始める
+# copier に移る前のテンプレートから作ったときだけ: 旧テンプレートの ADR・ADR の一覧・廃止した手順書を消す
+git rm -r docs/adr/README.md docs/adr/000[1-7]-*.md \
+  .agents/skills/python-project-bootstrap .agents/skills/python-uv-ci-setup \
+  .claude/skills/python-project-bootstrap .claude/skills/python-uv-ci-setup
 uvx copier copy --overwrite gh:shogo-hs/python-project-template .
 git diff                                     # 消えた・変わった自分の内容を確かめる
 git checkout -p -- <残したいファイル>         # 自分の内容に戻したい部分を選ぶ
@@ -61,7 +67,7 @@ git checkout -p -- <残したいファイル>         # 自分の内容に戻し
 2. 手元で試すときは、PR の版（未コミットの変更を含む）から生成する。
 
    ```bash
-   uvx copier copy --vcs-ref HEAD --defaults -d project_name=try-sample . /tmp/try-sample
+   uvx --from copier==9.19.1 copier copy --vcs-ref HEAD --defaults -d project_name=try-sample . /tmp/try-sample
    ```
 
    `--vcs-ref HEAD` を付けないと、最新のタグの版から生成される。

@@ -4,7 +4,7 @@ _subdirectory: project
 # .claude/skills/<name> を .agents/skills/<name> への symlink のまま写す（無いとコピーになる）
 _preserve_symlinks: true
 
-# チームが書き換えるファイル。copy のときだけ作り、update では触らない
+# チームのファイル。生成するときだけ作り、既にあれば上書きしない（既存のプロジェクトに copy するとき）
 _skip_if_exists:
   - README.md
   - .env.example
@@ -15,21 +15,42 @@ _skip_if_exists:
   - tests/unit/test_smoke.py
   - .github/ISSUE_TEMPLATE/*
 
+# copier の既定の除外に加え、update ではチームのファイルを扱わない（チームが消したファイルを作り直さない）
+_exclude:
+  - copier.yaml
+  - copier.yml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - .svn
+  - "{% if _copier_operation == 'update' %}README.md.jinja{% endif %}"
+  - "{% if _copier_operation == 'update' %}.env.example{% endif %}"
+  - "{% if _copier_operation == 'update' %}docs/product{% endif %}"
+  - "{% if _copier_operation == 'update' %}docs/adr{% endif %}"
+  - "{% if _copier_operation == 'update' %}tests/unit/test_smoke.py.jinja{% endif %}"
+  - "{% if _copier_operation == 'update' %}.github/ISSUE_TEMPLATE{% endif %}"
+
 project_name:
   type: str
   help: プロジェクト名（小文字・数字・ハイフン。例 csv-digest）
   validator: >-
-    {% if not (project_name | regex_search('^[a-z][a-z0-9-]*$')) %}
-    小文字で始め、小文字・数字・ハイフンだけで書いてください
+    {% if not (project_name | regex_search('^[a-z][a-z0-9]*(-[a-z0-9]+)*$')) %}
+    小文字で始め、小文字・数字を 1 つのハイフンでつないで書いてください（末尾と連続のハイフンは不可）
     {% endif %}
 
 package_name:
   type: str
-  help: src/ の下のパッケージ名
+  help: src/ の下のパッケージ名（標準ライブラリと同じ名前（csv・typing など）は使えない）
   default: "{{ project_name | replace('-', '_') }}"
   validator: >-
-    {% if not (package_name | regex_search('^[a-z][a-z0-9_]*$')) %}
-    小文字で始め、小文字・数字・アンダースコアだけで書いてください
+    {% if not (package_name | regex_search('^[a-z][a-z0-9]*(_[a-z0-9]+)*$')) %}
+    小文字で始め、小文字・数字を 1 つのアンダースコアでつないで書いてください
+    {% elif package_name | length > 40 %}
+    40 文字以内にしてください
+    {% elif package_name in ['tools', 'tests'] %}
+    {{ package_name }} はテンプレートが使う名前なので使えません
     {% endif %}
 
 description:
@@ -37,8 +58,8 @@ description:
   help: プロジェクトの説明（1 行）
   default: ""
   validator: >-
-    {% if '"' in description or '\\' in description %}
-    " と \ は使えません（pyproject.toml の文字列に入れるため）
+    {% if '"' in description or '\\' in description or '\n' in description %}
+    " と \ と改行は使えません（pyproject.toml の 1 行の文字列に入れるため）
     {% endif %}
 
 _message_after_copy: |

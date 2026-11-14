@@ -1,0 +1,3 @@
+# テンプレート由来のコードの整形を、チームの pyproject の line-length から切り離す（update で衝突しないように）
+extend = "../../pyproject.toml"
+line-length = 100

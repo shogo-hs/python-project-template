@@ -19,9 +19,10 @@ description: このプロジェクトの元になった python-project-template 
    - 質問を変えたいと言われたときだけ `--defaults` を外す。
 
 4. 衝突を解く。
-   - `git status --short` で変わったファイルを見る。衝突は、ファイルの中の `<<<<<<<`〜`>>>>>>>` の印か、`.rej` のファイルとして出る。
+   - `git status --short` で変わったファイルを見る。衝突したファイルは `UU` と出て、中に `<<<<<<< before updating`〜`>>>>>>> after updating` の印が入る。
    - チームが足した変更（依存・設定の値）は残し、テンプレートの変更（規則・スキル・`tools/`）を取り込む。どちらを残すか決められないときは、利用者に聞く。
-   - `.rej` は中身を反映してから消す。`.copier-answers.yml` は手で書き換えない。
+   - 印を消して解いたファイルは `git add <ファイル>` で解決済みにする。`.copier-answers.yml` は手で書き換えない。
+   - チームのファイル（README・vision.md・`docs/adr/`・`.env.example`・smoke テスト・Issue のテンプレート）は update では扱わない。消してあっても作り直されない。
 
 5. 確かめる。
    - `uv lock` → `uv sync --locked --dev` → `uv run pre-commit run --all-files` → `uv run pytest -q`。

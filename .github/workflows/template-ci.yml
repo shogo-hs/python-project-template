@@ -33,7 +33,7 @@ jobs:
       # dependabot は根の .github/workflows しか見ないので、生成先の CI の版がずれたらここで止める
       - name: Check action versions match project/
         run: |
-          versions() { grep -ho 'uses: [^ ]*' "$@" | sed 's/uses: //' | sort -u; }
+          versions() { grep -ho 'uses: *"\?[^" ]*' "$@" | sed 's/uses: *"\?//' | sort -u; }
           root=$(versions .github/workflows/*.yml)
           for spec in $(versions project/.github/workflows/*.yml); do
             name=${spec%@*}

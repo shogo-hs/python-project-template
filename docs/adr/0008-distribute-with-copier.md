@@ -19,7 +19,7 @@
 - copier（9.19 以上）で配る。`copier.yml` の `_subdirectory: project` で、生成先に写るものを `project/` に分け、テンプレート自身のもの（README・この docs/adr・テンプレートの CI・保守の AGENTS.md）を根に置く。
 - pyproject・pre-commit・CI・dependabot・パッケージの骨組みを、`project/` の実際のファイル（名前を埋めるものだけ `.jinja`）にする。手順書 `python-project-bootstrap` と `python-uv-ci-setup` は消す。
 - 生成先の ADR は、`0001`（ADR を使う）と `0002`（テンプレートの決まりを引き継ぐ。中身は AGENTS.md と設定ファイル、理由はテンプレート ADR、版は `.copier-answers.yml`）の 2 本から始める。テンプレート ADR は写さない。
-- チームが書き換えるファイル（README・vision.md・ADR 0001 と 0002・`.env.example`・smoke テスト・Issue のテンプレート）は `_skip_if_exists` に入れ、更新では触らない。ほか（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml）は `copier update` でテンプレートに追従する。生成先に template-update の手順書を置く。
+- チームが書き換えるファイル（README・vision.md・`docs/adr/`（README・0001・0002）・`.env.example`・smoke テスト・Issue のテンプレート）は、`_skip_if_exists`（既存のプロジェクトへの copy で上書きしない）と、update のときだけの `_exclude`（update では扱わず、チームが消しても作り直さない）に入れる。ほか（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml・PR のテンプレート）は `copier update` でテンプレートに追従する。生成先に template-update の手順書を置く。
 - `.claude/skills` の symlink を保つため `_preserve_symlinks: true` にする（無いとコピーになることを確かめた）。
 - テンプレートの CI（`template-ci.yml`）で、PR の版から生成し（`--vcs-ref HEAD`。無いと最新のタグの版が写る）、品質ゲートと actionlint を流す。根と `project/` の CI の action の版の食い違いでも落とす（dependabot は根の `.github/workflows` しか見ないため）。
 - マージしたら版のタグを付ける。copier は最新のタグを使うので、付けないと利用者に届かない。
@@ -41,7 +41,7 @@
 - 使う人の手順が「Use this template」の 1 回の操作から、`uvx copier copy` と `gh repo create` の 2 本のコマンドになる。
 - `copier update` で衝突したら、チームが解く（生成先の template-update の手順書）。
 - 保守者は、生成してからでないとテンプレートを試せない（README と AGENTS.md の手順）。
-- copier に移る前に作ったプロジェクトは、`copier copy --overwrite` で入れてから差分を選び戻す（README）。
+- copier に移る前に作ったプロジェクトは、旧テンプレートの ADR と廃止した手順書を消してから `copier copy --overwrite` で入れ、差分を選び戻す（README）。
 - GitHub のリポジトリ設定の「Template repository」を外す。押すと `project/` の外まで写ってしまうため。
 - ADR 0003 のうち bootstrap の挙動についての決定と、ADR 0004 の手順書の一覧は、この ADR で置き換える。
 
