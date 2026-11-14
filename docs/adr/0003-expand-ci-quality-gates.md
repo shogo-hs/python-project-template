@@ -1,9 +1,9 @@
 # ADR 0003: CI の品質ゲートを ruff / mypy / pytest の 3 本から 6 本へ拡充する
 
-最終更新: 2026-09-12
+最終更新: 2026-11-14
 - ステータス: 承認済み(accepted)
 - 決定者: shogo-hs
-- 関連: `docs/ai/canonical/playbooks/python-uv-ci-setup.md`, `docs/ai/playbook-assets/python-uv-ci-setup/references/tooling-best-practices.md`, [ADR 0002](./0002-enforce-hexagonal-dependencies-with-import-linter.md)
+- 関連: `.agents/skills/python-uv-ci-setup/SKILL.md`, `.agents/skills/python-uv-ci-setup/references/tooling-best-practices.md`, [ADR 0002](./0002-enforce-hexagonal-dependencies-with-import-linter.md)
 
 ## 1. 文脈
 
@@ -48,7 +48,7 @@
 
 - コードへの影響: 既存プロジェクトに適用すると、型の無い関数・未使用依存・`S` 規則違反・カバレッジ不足で CI が落ちる。段階導入する場合は `ignore` と `fail_under` を一時的に緩め、理由を ADR に残す。
 - 運用への影響: 開発依存が 2 本増える（import-linter, deptry）。pre-commit の実行時間が伸びる（実測 14 秒程度、キャッシュ後）。Dependabot の PR が週 1 本届く。
-- ドキュメントへの影響: `python-uv-ci-setup` Playbook、`templates.md`、`tooling-best-practices.md`、bootstrap スクリプト、`.github/dependabot.yml`。
+- ドキュメントへの影響: `python-uv-ci-setup` の手順書、`templates.md`、`tooling-best-practices.md`、bootstrap スクリプト、`.github/dependabot.yml`。
 
 ## 5. フォローアップ
 
@@ -59,3 +59,4 @@
 ## 6. 変更履歴
 
 - 2026-09-12: 初版作成。
+- 2026-11-14: PR #6 で `docs/ai/` を `AGENTS.md` と `.agents/skills/` に移したのに合わせ、関連と影響のパスを今の場所に直す（判断の中身は変えていない）。
