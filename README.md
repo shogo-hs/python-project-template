@@ -35,10 +35,10 @@ gh repo create <owner>/csv-digest --private --source . --push
 
 ```bash
 uvx copier check-update      # 新しい版があるかを見る
-uvx copier update --defaults # 作業ツリーが空の状態で流す。衝突は <<<<<<< の印か .rej のファイルで出る
+uvx copier update --defaults # 作業ツリーが空の状態で流す。衝突したファイルは git status で UU と出る
 ```
 
-README・vision.md・`docs/adr/`（README・0001・0002）・`.env.example`・smoke テスト・Issue のテンプレートはチームのもので、更新では扱わない（消してあっても作り直さない）。それ以外（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml・PR のテンプレート）はテンプレートに追従する。
+README・vision.md・`docs/adr/`（README・0001・0002）・`.env.example`・smoke テスト・Issue のテンプレートはチームのもので、更新では扱わない（消してあっても作り直さない）。`copier recopy` は使わない（生成のやり直しとして扱われ、チームが消したファイルが戻る）。それ以外（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml・PR のテンプレート）はテンプレートに追従する。
 
 ## 既にあるプロジェクトに入れる
 

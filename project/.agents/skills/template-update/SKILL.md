@@ -17,6 +17,7 @@ description: このプロジェクトの元になった python-project-template 
 3. 取り込む。
    - `uvx copier update --defaults`（前回の回答をそのまま使う）。
    - 質問を変えたいと言われたときだけ `--defaults` を外す。
+   - `copier recopy` は使わない。生成のやり直しとして扱われ、チームが消したファイルが戻る。
 
 4. 衝突を解く。
    - `git status --short` で変わったファイルを見る。衝突したファイルは `UU` と出て、中に `<<<<<<< before updating`〜`>>>>>>> after updating` の印が入る。
