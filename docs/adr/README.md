@@ -1,6 +1,6 @@
 # ADR 一覧
 
-このディレクトリは Architecture Decision Record（ADR）を保存する。
+このディレクトリは、テンプレート自身の設計判断（テンプレート ADR）を保存する。生成したプロジェクトには写らない（ADR 0008）。生成先の ADR は `project/docs/adr/` から始まる。
 
 ## 目的
 
@@ -22,7 +22,7 @@
 
 ## 作成ルール
 
-- 新規ADRは `.agents/skills/adr-management/references/_adr-template.md` を利用する。
+- 新規ADRは `project/.agents/skills/adr-management/references/_adr-template.md` を利用する。
 - 1ADR には 1 つの判断だけを記載する。
 - 既存判断を置換した場合は、新旧ADRの双方に相互リンクを張る。
 
@@ -35,3 +35,4 @@
 - [0005: 設計の正本をコードにし、設計書は作らず ADR だけを残す](./0005-code-as-design-source-of-truth.md) - 承認済み(accepted)
 - [0006: dotenvx をやめ、.env.example をコミットして .env はコミットしない](./0006-env-example-instead-of-dotenvx.md) - 承認済み(accepted)
 - [0007: PR ごとにコードの関係の差分をレビューする人に出し、関数の複雑さを CI で止める](./0007-review-relation-diff-and-complexity-gate.md) - 承認済み(accepted)
+- [0008: 配り方を GitHub のテンプレートリポジトリから copier に移し、生成物を project/ に分ける](./0008-distribute-with-copier.md) - 承認済み(accepted)

@@ -1,43 +1,72 @@
 # python-project-template
 
-Codex と Claude Code で開発する Python プロジェクト向けのテンプレート。
+Codex と Claude Code で開発する Python プロジェクトを、[copier](https://copier.readthedocs.io/) で作るテンプレート。
 
-- エージェント向けの規約は `AGENTS.md` 1 本。Codex はそのまま読み、Claude Code は `CLAUDE.md` の `@AGENTS.md` から読む。
-- 手順書（スキル）は `.agents/skills/` 1 か所。Claude Code 用の `.claude/skills/` はそこへの symlink。
-- 設計の正本はコード。設計判断の理由だけを `docs/adr/` に ADR として残す。
-- 品質ゲートは uv + ruff + mypy + import-linter + deptry + pytest + pre-commit + GitHub Actions。ruff は関数の複雑さ（10 まで）も見る。
-- AI が書いた実装に人の理解が置いていかれないよう、PR ごとに CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）を PR にコメントする。関係図は手で書かず、毎回コードから作り直す。
+生成したプロジェクトには、次のものが最初から入る。
 
-## 構成
+- 4 層（`adapters -> application -> ports -> domain`）のパッケージの骨組みと、依存の向きの検査（import-linter）
+- 品質ゲート 6 本（ruff format・ruff check（関数の複雑さ 10 まで）・mypy・import-linter・deptry・pytest）を、pre-commit と GitHub Actions の両方で流す設定
+- PR ごとに、コードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）を CI が PR にコメントする仕組み
+- エージェント向けの規約 `AGENTS.md` と手順書（ADR・コミット・テンプレートの更新の取り込み）
 
-```text
-.
-├── AGENTS.md                  # エージェント向けの規約（正本）
-├── CLAUDE.md                  # @AGENTS.md の 1 行
-├── .agents/skills/<name>/     # 手順書の正本（SKILL.md・references/・scripts/）
-├── .claude/skills/<name>      # .agents/skills/<name> への symlink
-├── tools/code_graph.py        # PR の関係の差分を作るスクリプト（CI が使う）
-├── docs/adr/                  # 設計判断の記録
-└── docs/product/vision.md     # プロダクトの目的・対象ユーザー・成功状態
+生成先に写るのは `project/` の中だけ。この README・`docs/adr/`（テンプレート ADR）・テンプレートの CI は写らない。
+
+## 前提
+
+- [uv](https://docs.astral.sh/uv/) 0.10.7 以上（copier は `uvx` で動かすので入れなくてよい）
+- GitHub にリポジトリを作るなら [gh](https://cli.github.com/)
+
+## 新しいプロジェクトを作る
+
+```bash
+uvx copier copy gh:shogo-hs/python-project-template csv-digest   # 質問に答える（プロジェクト名・パッケージ名・説明）
+cd csv-digest
+git init -b main
+uv lock                                                          # uv.lock を作る（CI は uv.lock どおりに入れる）
+git add -A && git commit -m "chore: テンプレートから立ち上げる"
+gh repo create <owner>/csv-digest --private --source . --push
 ```
 
-## 同梱の手順書
+`uv.lock` と `.copier-answers.yml` は必ずコミットする。続きは生成したプロジェクトの README.md の「セットアップ」。`docs/product/vision.md` は、エージェントが最初の作業の前に聞いて埋める。
 
-| 名前 | 使う場面 |
-| --- | --- |
-| `python-project-bootstrap` | 新しいプロジェクトを立ち上げる |
-| `python-uv-ci-setup` | pyproject.toml・pre-commit・CI・Dependabot を整える |
-| `adr-management` | 設計判断を ADR に記録・更新する |
-| `git-commit` | 日本語の規約に沿ってコミットする |
+## テンプレートの更新を取り込む
 
-どちらのエージェントも、依頼の内容から手順書を自動で選ぶ。Claude Code では `/python-project-bootstrap` のように名前でも呼べる。
+生成したプロジェクトで、エージェントに「テンプレートの更新を取り込んで」と頼む（生成先の template-update の手順書）。手で行うなら次のとおり。
 
-## 新しいプロジェクトの立ち上げ
+```bash
+uvx copier check-update      # 新しい版があるかを見る
+uvx copier update --defaults # 作業ツリーが空の状態で流す。衝突は <<<<<<< の印か .rej のファイルで出る
+```
 
-1. GitHub で「Use this template」から新規リポジトリを作り、clone する（Windows では `git config --global core.symlinks true` を先に設定する）。
-2. リポジトリのルートで Codex か Claude Code を起動し、「プロジェクトを立ち上げて」と頼む。
-3. エージェントの質問に答えて `docs/product/vision.md` を埋める。エージェントはパッケージの骨組み・`.env.example`・CI を作る。
+README・vision.md・ADR の 0001 と 0002・`.env.example`・smoke テスト・Issue のテンプレートはチームのもので、更新では触らない。それ以外（AGENTS.md・手順書・`tools/`・CI・pre-commit・pyproject.toml）はテンプレートに追従する。
 
-## 環境変数
+## 既にあるプロジェクトに入れる
 
-必要な変数は `.env.example` に並べてコミットし、実際の値は `.env`（コミットしない）に書く。読み込みは `uv run --env-file .env <コマンド>`。
+テンプレートから作っていないプロジェクトや、copier に移る前（v1.0.0 より前）にこのテンプレートから作ったプロジェクトに入れるときは、上書きしてから差分を選び戻す。
+
+```bash
+git switch -c chore/adopt-template          # 作業ツリーが空の状態から始める
+uvx copier copy --overwrite gh:shogo-hs/python-project-template .
+git diff                                     # 消えた・変わった自分の内容を確かめる
+git checkout -p -- <残したいファイル>         # 自分の内容に戻したい部分を選ぶ
+```
+
+`--overwrite` を付けないと、既にあるファイルとぶつかったところで止まり、途中まで書いた状態で残る。`.copier-answers.yml` を手で置いて `copier update` するだけでは、プロジェクトに無いファイルは「消したもの」と扱われ、何も足されない。
+
+## テンプレートを保守する
+
+保守の規約は [AGENTS.md](AGENTS.md)、テンプレートの設計判断は [docs/adr/](docs/adr/README.md)（テンプレート ADR）。
+
+1. ブランチで `project/` か `copier.yml` を直し、PR を出す。テンプレートの CI（`.github/workflows/template-ci.yml`）が、PR の版から生成して品質ゲートを流す。
+2. 手元で試すときは、PR の版（未コミットの変更を含む）から生成する。
+
+   ```bash
+   uvx copier copy --vcs-ref HEAD --defaults -d project_name=try-sample . /tmp/try-sample
+   ```
+
+   `--vcs-ref HEAD` を付けないと、最新のタグの版から生成される。
+3. マージしたら版のタグを付ける。**タグを付けないと、利用者の `copier copy`・`copier update` に届かない**（copier は最新のタグを使う）。
+
+   ```bash
+   gh release create v1.1.0 --generate-notes   # 互換を壊す変更は v2.0.0 のように上げる
+   ```

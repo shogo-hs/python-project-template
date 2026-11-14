@@ -1,0 +1,14 @@
+"""パッケージが import できることを確かめる smoke テスト。
+
+生成直後でも pytest が「テスト 0 件」で失敗しないようにするために置く。
+"""
+
+import importlib
+
+
+def test_package_is_importable() -> None:
+    """パッケージを import でき、モジュールが返ることを確かめる。
+
+    パッケージの名前や src レイアウトの設定が壊れていると、ここで失敗する。
+    """
+    assert importlib.import_module("{{ package_name }}")

@@ -1,0 +1,54 @@
+# copier の設定。生成先に写るのは project/ の中だけ（テンプレート ADR 0008）。
+_min_copier_version: "9.19"
+_subdirectory: project
+# .claude/skills/<name> を .agents/skills/<name> への symlink のまま写す（無いとコピーになる）
+_preserve_symlinks: true
+
+# チームが書き換えるファイル。copy のときだけ作り、update では触らない
+_skip_if_exists:
+  - README.md
+  - .env.example
+  - docs/product/vision.md
+  - docs/adr/README.md
+  - docs/adr/0001-record-architecture-decisions.md
+  - docs/adr/0002-adopt-template-baseline.md
+  - tests/unit/test_smoke.py
+  - .github/ISSUE_TEMPLATE/*
+
+project_name:
+  type: str
+  help: プロジェクト名（小文字・数字・ハイフン。例 csv-digest）
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z][a-z0-9-]*$')) %}
+    小文字で始め、小文字・数字・ハイフンだけで書いてください
+    {% endif %}
+
+package_name:
+  type: str
+  help: src/ の下のパッケージ名
+  default: "{{ project_name | replace('-', '_') }}"
+  validator: >-
+    {% if not (package_name | regex_search('^[a-z][a-z0-9_]*$')) %}
+    小文字で始め、小文字・数字・アンダースコアだけで書いてください
+    {% endif %}
+
+description:
+  type: str
+  help: プロジェクトの説明（1 行）
+  default: ""
+  validator: >-
+    {% if '"' in description or '\\' in description %}
+    " と \ は使えません（pyproject.toml の文字列に入れるため）
+    {% endif %}
+
+_message_after_copy: |
+  {{ project_name }} を作りました。次にやること:
+
+    cd {{ _copier_conf.dst_path }}
+    git init -b main
+    uv lock
+    git add -A && git commit -m "chore: テンプレートから立ち上げる"
+    gh repo create <owner>/{{ project_name }} --private --source . --push
+
+  uv.lock と .copier-answers.yml は必ずコミットしてください（CI とテンプレートの更新に使います）。
+  そのあとは README.md の「セットアップ」に進みます。

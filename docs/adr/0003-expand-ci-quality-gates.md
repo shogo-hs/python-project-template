@@ -24,7 +24,7 @@
 - pre-commit に `pre-commit-hooks`（秘密鍵・巨大ファイル・TOML/YAML 構文・行末）と import-linter・deptry を足す。
 - GitHub Actions は `permissions: contents: read` と `concurrency` を置き、action を現行メジャーに更新する。以後の更新は Dependabot（`github-actions` + `uv`）に任せる。
 - build backend は uv 同梱の `uv_build` にする。
-- bootstrap は各層と `tests/` に `__init__.py`、smoke テスト、`.gitignore` の coverage 出力を生成し、生成直後に 6 本すべてが通る状態にする。
+- bootstrap は各層と `tests/` に `__init__.py` と smoke テストを生成し、生成直後に 6 本すべてが通る状態にする（coverage の出力はもとの `.gitignore` で除外されている。bootstrap は ADR 0008 で copier に置き換えた）。
 - 優先した要件: 生成直後に CI が緑であること。ツールを増やしすぎないこと（bandit は ruff の `S` で代替）。ローカルと CI で同じコマンドを使うこと。
 
 ## 3. 代替案と不採用理由
@@ -59,4 +59,5 @@
 ## 6. 変更履歴
 
 - 2026-09-12: 初版作成。
+- 2026-11-14: bootstrap が `.gitignore` に coverage の出力を足すという、実際の挙動と違う記述を直す。ADR 0008 への参照を足す。
 - 2026-11-14: PR #6 で `docs/ai/` を `AGENTS.md` と `.agents/skills/` に移したのに合わせ、関連と影響のパスを今の場所に直す（判断の中身は変えていない）。
