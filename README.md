@@ -44,12 +44,13 @@ README・vision.md・`docs/adr/`（README・0001・0002）・`.env.example`・sm
 
 テンプレートから作っていないプロジェクトや、copier に移る前（v1.0.0 より前）にこのテンプレートから作ったプロジェクトに入れるときは、上書きしてから差分を選び戻す。
 
-copier に移る前のテンプレートから作ったプロジェクトでは、先に旧テンプレートから来たものを消す。消さないと、旧テンプレートの ADR 0001〜0007 と廃止した手順書が残り、ADR 0002 が 2 本並ぶ（どれも `git diff` には出ない）。チームが自分で書いた ADR（0008 以降など）は残す。
+copier に移る前のテンプレートから作ったプロジェクトでは、先に旧テンプレートから来たものを消す。消さないと、旧テンプレートの ADR と廃止した手順書が残り、ADR 0002 が 2 本並ぶ（どれも `git diff` には出ない）。旧テンプレートの ADR は 0001 から始まる連番だが、何本あるかは作った時期で違う（0001〜0003 の版も 0001〜0006 の版もある）。`docs/adr/README.md` の一覧と中身を読み、チームが自分で書いた ADR と見分けてから、旧テンプレートのものだけを消す。
 
 ```bash
 git switch -c chore/adopt-template          # 作業ツリーが空の状態から始める
 # copier に移る前のテンプレートから作ったときだけ: 旧テンプレートの ADR・ADR の一覧・廃止した手順書を消す
-git rm -r docs/adr/README.md docs/adr/000[1-7]-*.md \
+# （<旧テンプレートの ADR> には、上で見分けたファイルを並べる。例 docs/adr/000[1-6]-*.md）
+git rm -r docs/adr/README.md <旧テンプレートの ADR> \
   .agents/skills/python-project-bootstrap .agents/skills/python-uv-ci-setup \
   .claude/skills/python-project-bootstrap .claude/skills/python-uv-ci-setup
 uvx copier copy --overwrite gh:shogo-hs/python-project-template .
