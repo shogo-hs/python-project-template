@@ -36,3 +36,4 @@
 - [0006: dotenvx をやめ、.env.example をコミットして .env はコミットしない](./0006-env-example-instead-of-dotenvx.md) - 承認済み(accepted)
 - [0007: PR ごとにコードの関係の差分をレビューする人に出し、関数の複雑さを CI で止める](./0007-review-relation-diff-and-complexity-gate.md) - 承認済み(accepted)
 - [0008: 配り方を GitHub のテンプレートリポジトリから copier に移し、生成物を project/ に分ける](./0008-distribute-with-copier.md) - 承認済み(accepted)
+- [0009: 開発と CI の Python の版を .python-version で固定する](./0009-pin-python-version.md) - 承認済み(accepted)
