@@ -41,7 +41,7 @@ line-length = 100
 docstring-code-format = true
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I", "UP", "B", "D", "S", "SIM", "C4", "RUF", "PTH"]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "C90", "D", "S", "SIM", "C4", "RUF", "PTH"]
 ignore = [
   # パッケージ（__init__.py）と __init__ メソッドには docstring を求めない
   "D104", "D107",
@@ -50,6 +50,10 @@ ignore = [
   # 全角括弧などを「紛らわしい文字」として誤検知する（日本語 docstring 前提では除外）
   "RUF001", "RUF002", "RUF003",
 ]
+
+[tool.ruff.lint.mccabe]
+# 分岐の多い関数を CI で止める（ADR 0007）。上げるときは理由を ADR に残す
+max-complexity = 10
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -260,6 +264,44 @@ jobs:
 
       - name: Pytest
         run: uv run pytest -q
+
+  # PR ごとに、増えた・消えた関数と依存の増減をレビューする人にコメントで出す（ADR 0007）
+  code-graph:
+    # fork からの PR はトークンが読み取り専用でコメントを書けないので走らせない
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: pyproject.toml
+
+      # checkout が取り出すのは PR の merge commit。第 1 親が、比べるべき base になる
+      - name: Build relation diff
+        run: |
+          git worktree add ../base HEAD^1
+          python tools/code_graph.py --base ../base/src --head src > code-graph.md
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- code-graph-diff -->"))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@code-graph.md
+          else
+            gh pr comment "$PR" --body-file code-graph.md
+          fi
 ```
 
 適用メモ:
@@ -267,6 +309,10 @@ jobs:
 - Python複数バージョン検証が必要なら `matrix` を追加する。
 - `permissions` は最小権限（読み取りのみ）。カバレッジのコメント投稿などで書き込みが要るジョブは、そのジョブにだけ権限を足す。
 - `concurrency` は同じブランチへの連続 push で古い実行を打ち切る。
+- `code-graph` ジョブは `tools/code_graph.py`（標準ライブラリだけ）を使い、依存の同期は要らない。同じ PR への 2 回目以降の push では、前のコメントを上書きする。
+- fork からの PR ではトークンが読み取り専用でコメントを書けないため、`if` で fork からの PR を外している。
+- PR の向き先のブランチだけを変えた（`edited`）ときは走らない。コメントは次の push で作り直される。
+- `tools/code_graph.py` は Python 3.14 の構文で書かれているので、setup-python で `pyproject.toml` の版を入れてから動かす。
 
 ## 4. .github/dependabot.yml（推奨テンプレート）
 
