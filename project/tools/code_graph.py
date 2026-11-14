@@ -219,7 +219,7 @@ def _read(src: Path, path: Path) -> _Module | None:
     """1 つのファイルを読み、定義と参照を集める。構文エラーなどで読めなければ None。"""
     try:
         tree = ast.parse(path.read_bytes(), str(path))  # BOM と coding 宣言は ast が解釈する
-    except SyntaxError, ValueError, OSError:
+    except (SyntaxError, ValueError, OSError):
         return None
     name = module_name(src, path)
     is_package = path.name == "__init__.py"

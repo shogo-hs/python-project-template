@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version-file: pyproject.toml
+          python-version-file: .python-version
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v10.3.3
@@ -67,7 +67,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v7
         with:
-          python-version-file: pyproject.toml
+          python-version-file: .python-version
 
       # checkout が取り出すのは PR の merge commit。第 1 親が、比べるべき base になる
       - name: Build relation diff

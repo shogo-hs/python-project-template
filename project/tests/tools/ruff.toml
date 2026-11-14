@@ -1,6 +1,6 @@
 # テンプレート由来のコード（tests/tools/）の ruff の設定。チームの pyproject.toml の ruff の設定を引き継がない
 # （チームが規則や行の長さを変えても、テンプレートの更新のたびに衝突しないように）。値はテンプレートの pyproject.toml と同じ。
-target-version = "py314"
+target-version = "py312"  # 3.14 より古い Python のプロジェクトでも読めるように、3.12 の書き方で整形する
 line-length = 100
 
 [format]
