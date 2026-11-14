@@ -1,0 +1,99 @@
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+description = "{{ description }}"
+requires-python = ">=3.14"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# パッケージ名がプロジェクト名から作った名前と違っても、uv_build が src/ の下を見つけられるように明示する
+module-name = "{{ package_name }}"
+
+[tool.uv]
+# 手元の uv が古すぎると uv.lock の形が変わるので、下限を決める（0.10.7 で確かめた）
+required-version = ">=0.10.7"
+
+[dependency-groups]
+dev = [
+  "deptry>=0.25",
+  "import-linter>=2.15",
+  "mypy>=2.4",
+  "pre-commit>=4.7",
+  "pytest>=9.2",
+  "pytest-cov>=7.1",
+  "ruff>=0.17",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "C90", "D", "S", "SIM", "C4", "RUF", "PTH"]
+ignore = [
+  # パッケージ（__init__.py）と __init__ メソッドには docstring を求めない
+  "D104", "D107",
+  # Google style と日本語 docstring の運用に合わない規則
+  "D203", "D213", "D400", "D401", "D415",
+  # 全角括弧などを「紛らわしい文字」として誤検知する（日本語 docstring 前提では除外）
+  "RUF001", "RUF002", "RUF003",
+]
+
+[tool.ruff.lint.mccabe]
+# 分岐の多い関数を CI で止める（テンプレート ADR 0007）。上げるときは理由を ADR に残す
+max-complexity = 10
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "S101"]
+
+[tool.mypy]
+python_version = "3.14"
+mypy_path = "src"
+explicit_package_bases = true
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+strict_equality = true
+show_error_codes = true
+pretty = true
+
+[tool.pytest]
+minversion = "9.2"
+strict = true
+addopts = ["-ra", "--cov", "--cov-report=term-missing"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.importlinter]
+root_package = "{{ package_name }}"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal layers: adapters -> application -> ports -> domain"
+type = "layers"
+containers = ["{{ package_name }}"]
+layers = ["adapters", "application", "ports", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "domain / ports do not depend on external technology"
+type = "forbidden"
+source_modules = ["{{ package_name }}.domain", "{{ package_name }}.ports"]
+forbidden_modules = ["fastapi", "sqlalchemy", "httpx", "requests", "boto3"]

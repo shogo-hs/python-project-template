@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --locked --dev
+
+      - name: Ruff format check
+        run: uv run ruff format --check .
+
+      - name: Ruff lint
+        run: uv run ruff check .
+
+      - name: Mypy
+        run: uv run mypy .
+
+      - name: Import Linter
+        run: uv run lint-imports
+
+      - name: Deptry
+        run: uv run deptry src
+
+      - name: Pytest
+        run: uv run pytest -q
+
+  # PR ごとに、増えた・消えた関数と依存の増減をレビューする人にコメントで出す（テンプレート ADR 0007）
+  code-graph:
+    # fork からの PR はトークンが読み取り専用でコメントを書けないので走らせない
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: pyproject.toml
+
+      # checkout が取り出すのは PR の merge commit。第 1 親が、比べるべき base になる
+      - name: Build relation diff
+        run: |
+          git worktree add ../base HEAD^1
+          python tools/code_graph.py --base ../base/src --head src > code-graph.md
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- code-graph-diff -->"))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@code-graph.md
+          else
+            gh pr comment "$PR" --body-file code-graph.md
+          fi

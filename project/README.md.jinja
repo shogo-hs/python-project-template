@@ -1,0 +1,56 @@
+# {{ project_name }}
+
+{{ description or "（このプロジェクトの説明を 1〜2 文で書く）" }}
+
+目的・対象ユーザー・成功状態は [docs/product/vision.md](docs/product/vision.md) に書く。
+
+## 前提
+
+- [uv](https://docs.astral.sh/uv/) 0.10.7 以上（Python 3.14 は uv が入れる）
+- Codex か Claude Code で開発する場合、規約は [AGENTS.md](AGENTS.md)
+
+## セットアップ
+
+clone したら、次の 2 つを実行する。
+
+```bash
+uv sync --locked --dev              # 依存を uv.lock どおりに入れる
+uv run pre-commit install           # コミット前と push 前の検査を入れる
+```
+
+環境変数が要るときは `.env.example` を `.env` にコピーして値を書き、`uv run --env-file .env <コマンド>` で読み込む。`.env` はコミットしない。
+
+## よく使うコマンド
+
+```bash
+uv run ruff format .                # 整形
+uv run ruff check .                 # lint（関数の複雑さ 10 まで）
+uv run mypy .                       # 型の検査
+uv run lint-imports                 # 層の依存方向の検査
+uv run deptry src                   # 依存の過不足の検査
+uv run pytest -q                    # テスト（カバレッジ 80% 以上）
+uv run python tools/code_graph.py --base <変更前の src> --head src   # 関係の差分を手元で見る
+```
+
+品質ゲートは CI（`.github/workflows/ci.yml`）でも同じものを流す。PR には、CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）をコメントする。
+
+## 構成
+
+```text
+src/{{ package_name }}/   # adapters -> application -> ports -> domain の 4 層（依存はこの向きだけ）
+tests/                    # unit/・integration/ と、tools/ のテスト
+tools/code_graph.py       # PR の関係の差分を作るスクリプト（テンプレート由来）
+docs/adr/                 # 設計判断の記録
+docs/product/vision.md    # 何のために作るか
+.agents/skills/           # エージェントの手順書（.claude/skills はそこへの symlink）
+```
+
+## テンプレートの更新を取り込む
+
+このプロジェクトは [python-project-template](https://github.com/shogo-hs/python-project-template) から作った。`AGENTS.md`・`.agents/skills/`・`tools/`・CI と pre-commit の設定・`pyproject.toml` はテンプレートに追従する。`tools/` を直したいときは、テンプレートに PR を出す。
+
+```bash
+uvx copier check-update             # 新しい版があるかを見る
+```
+
+取り込むときは、エージェントに「テンプレートの更新を取り込んで」と頼む（template-update スキル）。

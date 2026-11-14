@@ -1,0 +1,79 @@
+# copier の設定。生成先に写るのは project/ の中だけ（テンプレート ADR 0008）。
+_min_copier_version: "9.19"
+_subdirectory: project
+# .claude/skills/<name> を .agents/skills/<name> への symlink のまま写す（無いとコピーになる）
+_preserve_symlinks: true
+
+# チームのファイル。生成するときだけ作り、既にあれば上書きしない（既存のプロジェクトに copy するとき）
+_skip_if_exists:
+  - README.md
+  - .env.example
+  - docs/product/vision.md
+  - docs/adr/README.md
+  - docs/adr/0001-record-architecture-decisions.md
+  - docs/adr/0002-adopt-template-baseline.md
+  - tests/unit/test_smoke.py
+  - .github/ISSUE_TEMPLATE/*
+
+# copier の既定の除外に加え、update ではチームのファイルを扱わない（チームが消したファイルを作り直さない）
+_exclude:
+  - copier.yaml
+  - copier.yml
+  - "~*"
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - .svn
+  - "{% if _copier_operation == 'update' %}README.md.jinja{% endif %}"
+  - "{% if _copier_operation == 'update' %}.env.example{% endif %}"
+  - "{% if _copier_operation == 'update' %}docs/product{% endif %}"
+  - "{% if _copier_operation == 'update' %}docs/adr{% endif %}"
+  - "{% if _copier_operation == 'update' %}tests/unit/test_smoke.py.jinja{% endif %}"
+  - "{% if _copier_operation == 'update' %}.github/ISSUE_TEMPLATE{% endif %}"
+
+project_name:
+  type: str
+  help: プロジェクト名（小文字・数字・ハイフン。例 csv-digest）
+  validator: >-
+    {% if not (project_name | regex_search('^[a-z][a-z0-9]*(-[a-z0-9]+)*$')) %}
+    小文字で始め、小文字・数字を 1 つのハイフンでつないで書いてください（末尾と連続のハイフンは不可）
+    {% elif project_name in ['deptry', 'import-linter', 'mypy', 'pre-commit', 'pytest', 'pytest-cov', 'ruff'] %}
+    {{ project_name }} は開発用の依存と同じ名前なので使えません（uv lock が自分自身への依存で落ちる）
+    {% endif %}
+
+package_name:
+  type: str
+  help: src/ の下のパッケージ名（標準ライブラリと同じ名前（csv・typing など）は使えない）
+  default: "{{ project_name | replace('-', '_') }}"
+  validator: >-
+    {% if not (package_name | regex_search('^[a-z][a-z0-9]*(_[a-z0-9]+)*$')) %}
+    小文字で始め、小文字・数字を 1 つのアンダースコアでつないで書いてください
+    {% elif package_name | length > 40 %}
+    40 文字以内にしてください
+    {% elif package_name in ['tools', 'tests'] %}
+    {{ package_name }} はテンプレートが使う名前なので使えません
+    {% elif package_name in ['and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'false', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'none', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'true', 'try', 'while', 'with', 'yield'] %}
+    {{ package_name }} は Python の予約語なので使えません
+    {% endif %}
+
+description:
+  type: str
+  help: プロジェクトの説明（1 行）
+  default: ""
+  validator: >-
+    {% if '"' in description or '\\' in description or '\n' in description %}
+    " と \ と改行は使えません（pyproject.toml の 1 行の文字列に入れるため）
+    {% endif %}
+
+_message_after_copy: |
+  {{ project_name }} を作りました。次にやること:
+
+    cd {{ _copier_conf.dst_path }}
+    git init -b main
+    uv lock
+    git add -A && git commit -m "chore: テンプレートから立ち上げる"
+    gh repo create <owner>/{{ project_name }} --private --source . --push
+
+  uv.lock と .copier-answers.yml は必ずコミットしてください（CI とテンプレートの更新に使います）。
+  そのあとは README.md の「セットアップ」に進みます。

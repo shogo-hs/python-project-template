@@ -1,3 +1,5 @@
+# テンプレートのリポジトリ自身の更新。project/.github/workflows は dependabot に見えないので、
+# 根の版が上がったら project/ 側もそろえる（Template CI が食い違いで落ちる）
 version: 2
 updates:
   - package-ecosystem: "github-actions"

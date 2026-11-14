@@ -1,0 +1,59 @@
+# テンプレート自身の CI。PR の版から生成し、生成先が品質ゲートを通るかを確かめる（テンプレート ADR 0008）
+name: Template CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # copier が版（タグ）を読むため
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
+
+      # dependabot は根の .github/workflows しか見ないので、生成先の CI の版がずれたらここで止める
+      - name: Check action versions match project/
+        run: |
+          versions() { grep -ho 'uses: *"\?[^" ]*' "$@" | sed 's/uses: *"\?//' | sort -u; }
+          root=$(versions .github/workflows/*.yml)
+          for spec in $(versions project/.github/workflows/*.yml); do
+            name=${spec%@*}
+            if ! grep -qx "$spec" <<<"$root"; then
+              echo "::error::project/ の $spec が根の workflow の版（$(grep "^$name@" <<<"$root" || echo なし)）と違う"
+              exit 1
+            fi
+          done
+
+      - name: Generate a project from this revision
+        run: uvx --from copier==9.19.1 copier copy --vcs-ref HEAD --defaults -d project_name=ci-sample . "$RUNNER_TEMP/ci-sample"
+
+      - name: Quality gates on the generated project
+        working-directory: ${{ runner.temp }}/ci-sample
+        run: |
+          git init -q -b main && git add -A
+          uv lock
+          uv sync --locked --dev
+          uv run pre-commit run --all-files
+          uv run pytest -q
+
+      - name: Lint workflows
+        run: uvx --from actionlint-py actionlint .github/workflows/*.yml "$RUNNER_TEMP"/ci-sample/.github/workflows/*.yml

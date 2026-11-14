@@ -36,3 +36,4 @@
 ## 5. 変更履歴
 
 - 2026-11-05: 新規作成
+- 2026-11-14: 同梱の手順書の一覧と置き場所（根の `.agents/skills/`）は、ADR 0008 で `project/` の下の 3 本（adr-management・git-commit・template-update）に置き換えた。
