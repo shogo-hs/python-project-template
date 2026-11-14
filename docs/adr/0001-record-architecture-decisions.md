@@ -1,9 +1,9 @@
 # ADR 0001: ADR運用を導入して設計判断を記録する
 
-最終更新: 2026-02-08
+最終更新: 2026-11-14
 - ステータス: 承認済み(accepted)
 - 決定者: shogo-hs
-- 関連: `docs/ai/canonical/task-routing.md`, `docs/ai/canonical/playbooks/adr-management.md`
+- 関連: `AGENTS.md`, `.agents/skills/adr-management/SKILL.md`
 
 ## 1. 文脈
 
@@ -26,7 +26,7 @@
 
 - コードへの影響: なし（ドキュメント運用変更のみ）。
 - 運用への影響: 方針変更時に ADR 作成/更新の手順が追加される。
-- ドキュメントへの影響: `docs/adr/README.md` と `adr-management` Playbook の維持が必要。
+- ドキュメントへの影響: `docs/adr/README.md` と `adr-management` の手順書（`.agents/skills/adr-management/SKILL.md`）の維持が必要。
 
 ## 5. フォローアップ
 
@@ -36,3 +36,4 @@
 ## 6. 変更履歴
 
 - 2026-02-08: 初版作成。
+- 2026-11-14: PR #6 で `docs/ai/` を `AGENTS.md` と `.agents/skills/` に移したのに合わせ、関連と影響のパスを今の場所に直す（判断の中身は変えていない）。

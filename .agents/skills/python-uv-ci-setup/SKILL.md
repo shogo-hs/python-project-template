@@ -38,6 +38,7 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 - `.github/workflows/ci.yml` を作成または更新する。
 - `permissions: contents: read` と `concurrency` を置く。
 - `actions/setup-python` と `astral-sh/setup-uv` を使い、`uv sync --locked --dev` の後にローカルと同じ 6 本のチェックを実行する。
+- `code-graph` ジョブを入れ、PR ごとに `tools/code_graph.py` で関係の差分を PR にコメントさせる。`tools/code_graph.py` が無い既存プロジェクトでは、このテンプレートから `tools/` と `tests/tools/` をコピーする（`tests/__init__.py` も要る）。
 - キャッシュは `setup-uv` の `enable-cache: true` を基本にする。
 - `.github/dependabot.yml` を作成し、`github-actions` と `uv` を週次更新にする。
 
@@ -64,6 +65,7 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 ## 運用ルール
 
 - 型チェックは `mypy` に固定し、`ty` は使わない。
+- 関数の複雑さは ruff の `C90`（`max-complexity = 10`）で止める。上げるときや `# noqa: C901` を付けるときは理由を残す。
 - 型ヒントは必須（`disallow_untyped_defs`）。テストにも同じ基準を適用し、override で緩めない。
 - 依存方向（`adapters -> application -> ports -> domain`）と `domain` / `ports` の外部技術への非依存は import-linter で検証する。文書の約束だけにしない。
 - import-linter の契約を緩める（`ignore_imports` を足す）ときは理由をコメントに残す。例外が増えるなら設計を見直す。
@@ -81,3 +83,4 @@ description: uv を使う Python プロジェクトで、format/lint/静的型�
 - そのまま適用できる雛形: `references/templates.md`
 - 依存方向を機械検証する判断: `docs/adr/0002-enforce-hexagonal-dependencies-with-import-linter.md`
 - 品質ゲート拡充の判断: `docs/adr/0003-expand-ci-quality-gates.md`
+- 関係の差分と複雑さの判断: `docs/adr/0007-review-relation-diff-and-complexity-gate.md`

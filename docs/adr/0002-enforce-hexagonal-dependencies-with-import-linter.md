@@ -1,9 +1,9 @@
 # ADR 0002: Hexagonal の依存方向を import-linter で機械検証する
 
-最終更新: 2026-09-12
+最終更新: 2026-11-14
 - ステータス: 承認済み(accepted)
 - 決定者: shogo-hs
-- 関連: `docs/ai/canonical/coding-standards.md`, `docs/ai/canonical/playbooks/python-uv-ci-setup.md`, `docs/ai/playbook-assets/python-uv-ci-setup/references/templates.md`, [ADR 0003](./0003-expand-ci-quality-gates.md)
+- 関連: `AGENTS.md`, `.agents/skills/python-uv-ci-setup/SKILL.md`, `.agents/skills/python-uv-ci-setup/references/templates.md`, [ADR 0003](./0003-expand-ci-quality-gates.md)
 
 ## 1. 文脈
 
@@ -35,7 +35,7 @@
 
 - コードへの影響: `src/<package>/` の各層に `__init__.py` が必要（bootstrap が生成する）。既存プロジェクトで逆依存があると CI が落ちるため、導入時に修正するか `ignore_imports` に理由つきで登録する。
 - 運用への影響: `pyproject.toml` に `[build-system]` が必要になる（無いとパッケージが解決できず契約が評価できない）。契約を緩めるときは理由をコメントに残す。
-- ドキュメントへの影響: `python-uv-ci-setup` Playbook、`templates.md`、`tooling-best-practices.md`、bootstrap が生成する `docs/rules/code_architecture/README.md`。
+- ドキュメントへの影響: `python-uv-ci-setup` の手順書、`templates.md`、`tooling-best-practices.md`、層の責務を書いた `.agents/skills/python-project-bootstrap/references/project-structure.md`（初版の時点では bootstrap が生成する `docs/rules/code_architecture/README.md` だった）。
 
 ## 5. フォローアップ
 
@@ -45,3 +45,4 @@
 ## 6. 変更履歴
 
 - 2026-09-12: 初版作成。
+- 2026-11-14: PR #6 で `docs/ai/` を `AGENTS.md` と `.agents/skills/` に移したのに合わせ、関連と影響のパスを今の場所に直す（判断の中身は変えていない）。

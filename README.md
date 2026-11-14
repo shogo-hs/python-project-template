@@ -5,7 +5,8 @@ Codex と Claude Code で開発する Python プロジェクト向けのテン�
 - エージェント向けの規約は `AGENTS.md` 1 本。Codex はそのまま読み、Claude Code は `CLAUDE.md` の `@AGENTS.md` から読む。
 - 手順書（スキル）は `.agents/skills/` 1 か所。Claude Code 用の `.claude/skills/` はそこへの symlink。
 - 設計の正本はコード。設計判断の理由だけを `docs/adr/` に ADR として残す。
-- 品質ゲートは uv + ruff + mypy + import-linter + deptry + pytest + pre-commit + GitHub Actions。
+- 品質ゲートは uv + ruff + mypy + import-linter + deptry + pytest + pre-commit + GitHub Actions。ruff は関数の複雑さ（10 まで）も見る。
+- AI が書いた実装に人の理解が置いていかれないよう、PR ごとに CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）を PR にコメントする。関係図は手で書かず、毎回コードから作り直す。
 
 ## 構成
 
@@ -15,6 +16,7 @@ Codex と Claude Code で開発する Python プロジェクト向けのテン�
 ├── CLAUDE.md                  # @AGENTS.md の 1 行
 ├── .agents/skills/<name>/     # 手順書の正本（SKILL.md・references/・scripts/）
 ├── .claude/skills/<name>      # .agents/skills/<name> への symlink
+├── tools/code_graph.py        # PR の関係の差分を作るスクリプト（CI が使う）
 ├── docs/adr/                  # 設計判断の記録
 └── docs/product/vision.md     # プロダクトの目的・対象ユーザー・成功状態
 ```

@@ -21,6 +21,7 @@
   - `S`（flake8-bandit 相当）: `eval` / `subprocess` の shell 実行 / 弱いハッシュなどセキュリティ上の問題。
   - `SIM`（flake8-simplify）と `C4`（comprehensions）: 冗長な書き方の整理。
   - `RUF`（Ruff 固有）: 可変既定値、未使用 `noqa` など。
+  - `C90`（McCabe の循環的複雑度）: `max-complexity = 10` を超える関数を止める。AI が書くコードで複雑さが増えやすいため（ADR 0007）。
   - `PTH`（flake8-use-pathlib）: `os.path` より `pathlib` を使う。
 - bandit を別ツールとして入れない。`S` 規則で同じ検査ができる。
 - `pydocstyle` は `convention = "google"` を指定する。
@@ -123,6 +124,7 @@
 - `concurrency` で同じブランチの古い実行を打ち切る。
 - `uv sync --locked --dev` の後、`ruff format --check`、`ruff check`、`mypy`、`lint-imports`、`deptry`、`pytest` を順番に実行する。
 - 失敗時に原因を分離しやすいよう、ステップを分割する。
+- PR では `code-graph` ジョブが `tools/code_graph.py` で base と head の関係の差分を作り、PR にコメントする（ADR 0007）。このジョブにだけ `pull-requests: write` を付ける。
 - action のメジャーバージョンは導入時点の最新を使い、以後の更新は Dependabot に任せる。
 
 参考:

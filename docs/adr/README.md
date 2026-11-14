@@ -34,3 +34,4 @@
 - [0004: AGENTS.md と .agents/skills を直接の正本にし、Cursor 対応と生成スクリプトをやめる](./0004-agents-md-and-shared-skills.md) - 承認済み(accepted)
 - [0005: 設計の正本をコードにし、設計書は作らず ADR だけを残す](./0005-code-as-design-source-of-truth.md) - 承認済み(accepted)
 - [0006: dotenvx をやめ、.env.example をコミットして .env はコミットしない](./0006-env-example-instead-of-dotenvx.md) - 承認済み(accepted)
+- [0007: PR ごとにコードの関係の差分をレビューする人に出し、関数の複雑さを CI で止める](./0007-review-relation-diff-and-complexity-gate.md) - 承認済み(accepted)
