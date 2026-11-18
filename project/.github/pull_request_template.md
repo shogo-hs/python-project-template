@@ -28,4 +28,4 @@
 - [ ] 追加・更新したドキュメントを列挙した
 - [ ] 機密情報を含んでいない
 - [ ] 必要なテスト/検証を実施した
-- [ ] CI が付けた「コードの関係の差分」のコメントを読み、増えた・消えた・引数が変わった定義と依存の増減を説明できる（fork からの PR にはコメントが付かないので、手元で `uv run python tools/code_graph.py` を流す）
+- [ ] CI が付けた「コードの関係の差分」のコメントを読み、増えた・消えた・引数が変わった定義と依存の増減を説明できる（fork からの PR にはコメントが付かないので、手元で `git worktree add ../base origin/main` のあと `uv run python tools/code_graph.py --base ../base/src --head src` を流す）
