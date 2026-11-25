@@ -37,4 +37,5 @@
 - [0007: PR ごとにコードの関係の差分をレビューする人に出し、関数の複雑さを CI で止める](./0007-review-relation-diff-and-complexity-gate.md) - 承認済み(accepted)
 - [0008: 配り方を GitHub のテンプレートリポジトリから copier に移し、生成物を project/ に分ける](./0008-distribute-with-copier.md) - 承認済み(accepted)
 - [0009: 開発と CI の Python の版を .python-version で固定する](./0009-pin-python-version.md) - 承認済み(accepted)
-- [0010: PR で変えたモジュールにミューテーションテストをかけ、生き残りを PR にコメントする](./0010-mutation-testing-on-changed-modules.md) - 承認済み(accepted)
+- [0010: PR で変えたモジュールにミューテーションテストをかけ、生き残りを PR にコメントする](./0010-mutation-testing-on-changed-modules.md) - 承認済み(accepted)（変異を入れる範囲は 0011 で置き換えた）
+- [0011: ミューテーションテストの範囲を PR で中身を変えた関数に絞り、時間の上限を付ける](./0011-mutation-testing-on-changed-functions.md) - 承認済み(accepted)

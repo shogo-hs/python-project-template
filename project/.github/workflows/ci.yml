@@ -2,11 +2,18 @@ name: CI
 
 on:
   pull_request:
+    # ready_for_review は、下書きを外したときに mutation ジョブを走らせるために足している
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
 
 permissions:
   contents: read
+
+env:
+  # mutation ジョブが変異を流す時間の上限（分）。超えたら打ち切り、そこまでに確かめた分をコメントする（テンプレート ADR 0011）
+  # 変えるときは、このファイルを書き換えず、リポジトリの変数（Settings → Variables）に同じ名前で入れる
+  MUTATION_TIMEOUT_MINUTES: ${{ vars.MUTATION_TIMEOUT_MINUTES || 15 }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -50,10 +57,11 @@ jobs:
       - name: Pytest
         run: uv run pytest -q
 
-  # PR で変えた src/ のモジュールにだけ変異を入れ、テストが落とせなかった変異を PR にコメントする（テンプレート ADR 0010）
+  # PR で中身を変えた src/ の関数・メソッドにだけ変異を入れ、テストが落とせなかった変異を PR にコメントする（テンプレート ADR 0010・0011）
   # 生き残りには文言や結果の変わらない書き換えも混ざるので、CI は落とさない
+  # 下書きの PR では走らせない（作業中の push のたびに長いジョブが走るのを避ける。下書きを外すと走る）
   mutation:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -77,32 +85,56 @@ jobs:
       - name: Sync dependencies
         run: uv sync --locked --dev
 
-      # checkout が取り出すのは PR の merge commit。第 1 親との差分が PR の変更になる
-      - name: Mutate changed modules
+      # checkout が取り出すのは PR の merge commit。第 1 親が、比べるべき base になる
+      - name: Mutate changed functions
         run: |
-          mapfile -t modules < <(git diff --name-only --diff-filter=AMR HEAD^1 -- 'src/*.py' \
-            | sed -E 's#^src/##; s#(/__init__)?\.py$##; s#/#.#g')
-          # 変異の名前は <モジュール>.x_<関数>__mutmut_N か <モジュール>.xǁ<クラス>ǁ<メソッド>__mutmut_N
-          globs=()
-          for m in "${modules[@]}"; do globs+=("$m.x_*" "$m.xǁ*"); done
+          git worktree add ../base HEAD^1
+          python tools/changed_functions.py --base ../base/src --head src > changed.txt
+          mapfile -t functions < changed.txt
           {
             echo "<!-- mutation-survivors -->"
             echo "## ミューテーションテスト"
             echo
-            if [ ${#modules[@]} -eq 0 ]; then
-              echo "src/ の .py に変更が無いので、変異を入れていない。"
-            elif ! uv run mutmut run "${globs[@]}" > mutmut.log 2>&1; then
-              if ! grep -q "nothing matches" mutmut.log; then cat mutmut.log >&2; exit 1; fi
-              echo "変えたモジュールに、変異を入れられる箇所が無い。"
+            if [ ${#functions[@]} -eq 0 ]; then
+              echo "src/ の関数・メソッドの中身に変更が無いので、変異を入れていない。"
             else
-              mapfile -t survived < <(uv run mutmut results | awk -F': ' '$2 == "survived" { gsub(/ /, "", $1); print $1 }')
-              echo "変えたモジュール ${#modules[@]} 個に変異を入れ、テストが落とせなかった変異が ${#survived[@]} 個ある。"
-              echo "条件・境界・戻り値・順序が変わるものはテストの穴なので、テストを足す。文言だけの変化や、結果の変わらない書き換えは残してよい。"
-              for s in "${survived[@]}"; do
-                printf '\n<details><summary><code>%s</code></summary>\n\n```diff\n' "$s"
-                uv run mutmut show "$s" | grep -v '^#'
-                printf '```\n\n</details>\n'
-              done
+              # 変異の名前は <関数の名前>__mutmut_N。上限で打ち切ると 124（TERM で止まらず KILL したら 137）が返る
+              status=0
+              timeout -k 10 "${MUTATION_TIMEOUT_MINUTES}m" uv run mutmut run "${functions[@]/%/__mutmut_*}" > mutmut.log 2>&1 || status=$?
+              timed_out=""
+              if [ "$status" -eq 124 ] || [ "$status" -eq 137 ]; then
+                timed_out="上限の ${MUTATION_TIMEOUT_MINUTES} 分で打ち切った"
+              elif [ "$status" -ne 0 ] && ! grep -q "nothing matches" mutmut.log; then
+                cat mutmut.log >&2
+                exit 1
+              fi
+              if ! uv run mutmut results --all true > results.txt 2> results.err; then
+                # 打ち切りが mutmut の結果の書き込みと重なると、結果のファイルが途中で切れて読めなくなる
+                if [ -z "$timed_out" ]; then cat results.err >&2; exit 1; fi
+                echo "中身を変えた関数・メソッドは ${#functions[@]} 個ある。${timed_out}ときに mutmut の結果のファイルが壊れ、確かめた分を読めなかった。ジョブを流し直すか、手元で \`uv run mutmut run '<関数>__mutmut_*'\` を流して確かめる。"
+              else
+                # mutmut results は全部の関数の変異を出すので、変えた関数の分だけを「状態・関数・変異」の形で取り出す
+                awk -F': ' -v OFS='\t' '
+                  NR == FNR { want[$0]; next }
+                  { name = $1; gsub(/ /, "", name); fn = name; sub(/__mutmut_[0-9]+$/, "", fn); if (fn in want) print $2, fn, name }
+                ' changed.txt results.txt > mutants.tsv
+                count() { awk -F'\t' -v s="$1" '$1 == s' mutants.tsv | wc -l; }
+                mapfile -t survived < <(awk -F'\t' '$1 == "survived" { print $3 }' mutants.tsv)
+                echo "中身を変えた関数・メソッド ${#functions[@]} 個のうち $(cut -f2 mutants.tsv | sort -u | wc -l) 個に、変異を $(wc -l < mutants.tsv) 個入れた。テストが落とせなかった変異が ${#survived[@]} 個、呼ぶテストが無くて確かめられなかった変異が $(count "no tests") 個ある。"
+                echo "条件・境界・戻り値・順序が変わるものはテストの穴なので、テストを足す。文言だけの変化や、結果の変わらない書き換えは残してよい。"
+                if [ -n "$timed_out" ]; then
+                  echo
+                  echo "${timed_out}ので、変異 $(count "not checked") 個は確かめていない。手元で \`uv run mutmut run '<関数>__mutmut_*'\` を流して確かめる。"
+                  printf '\n<details><summary>確かめていない変異が残っている関数</summary>\n\n```\n'
+                  awk -F'\t' '$1 == "not checked" { print $2 }' mutants.tsv | sort -u
+                  printf '```\n\n</details>\n'
+                fi
+                for s in "${survived[@]}"; do
+                  printf '\n<details><summary><code>%s</code></summary>\n\n```diff\n' "$s"
+                  uv run mutmut show "$s" | grep -v '^#'
+                  printf '```\n\n</details>\n'
+                done
+              fi
             fi
           } > mutation.md
           # コメントの上限（65,536 文字）に収める

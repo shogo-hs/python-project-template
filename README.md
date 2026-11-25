@@ -7,7 +7,7 @@ Codex と Claude Code で開発する Python プロジェクトを、[copier](ht
 - 4 層（`adapters -> application -> ports -> domain`）のパッケージの骨組みと、依存の向きの検査（import-linter）
 - 品質ゲート 6 本（ruff format・ruff check（関数の複雑さ 10 まで）・mypy・import-linter・deptry・pytest）を、pre-commit と GitHub Actions の両方で流す設定
 - PR ごとに、コードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）を CI が PR にコメントする仕組み
-- PR ごとに、変えたモジュールにわざと変異を入れ、テストが落とせなかった変異を CI が PR にコメントする仕組み（ミューテーションテスト。mutmut）
+- PR ごとに、中身を変えた関数にわざと変異を入れ、テストが落とせなかった変異を CI が PR にコメントする仕組み（ミューテーションテスト。mutmut。時間の上限は 15 分）
 - エージェント向けの規約 `AGENTS.md` と手順書（ADR・コミット・テンプレートの更新の取り込み）
 
 生成先に写るのは `project/` の中だけ。この README・`docs/adr/`（テンプレート ADR）・テンプレートの CI は写らない。
