@@ -10,7 +10,8 @@ permissions:
 
 env:
   # mutation ジョブが変異を流す時間の上限（分）。超えたら打ち切り、そこまでに確かめた分をコメントする（テンプレート ADR 0011）
-  MUTATION_TIMEOUT_MINUTES: 15
+  # 変えるときは、このファイルを書き換えず、リポジトリの変数（Settings → Variables）に同じ名前で入れる
+  MUTATION_TIMEOUT_MINUTES: ${{ vars.MUTATION_TIMEOUT_MINUTES || 15 }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
