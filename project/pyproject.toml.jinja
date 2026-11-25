@@ -21,6 +21,7 @@ required-version = ">=0.10.7"
 dev = [
   "deptry>=0.25",
   "import-linter>=2.15",
+  "mutmut>=3.8.1",
   "mypy>=2.4",
   "pre-commit>=4.7",
   "pytest>=9.2",
@@ -68,12 +69,22 @@ disallow_incomplete_defs = true
 strict_equality = true
 show_error_codes = true
 pretty = true
+# mutmut の作業用コピー（変異を入れたコード）は型を検査しない
+exclude = ["^mutants/"]
 
 [tool.pytest]
 minversion = "9.2"
 strict = true
 addopts = ["-ra", "--cov", "--cov-report=term-missing"]
 testpaths = ["tests"]
+
+[tool.mutmut]
+# テスト全体が確かめていない振る舞いを、コードをわざと壊して見つける（テンプレート ADR 0010）
+source_paths = ["src/"]
+# mutmut は mutants/ にコピーを作ってそこでテストを流す。tests/tools が import する tools/ も要る
+also_copy = ["tools/"]
+# 変異を入れたコードではカバレッジの門（80%）を通らないので、mutmut の中では測らない
+pytest_add_cli_args = ["--no-cov"]
 
 [tool.coverage.run]
 branch = true

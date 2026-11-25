@@ -50,6 +50,80 @@ jobs:
       - name: Pytest
         run: uv run pytest -q
 
+  # PR で変えた src/ のモジュールにだけ変異を入れ、テストが落とせなかった変異を PR にコメントする（テンプレート ADR 0010）
+  # 生き残りには文言や結果の変わらない書き換えも混ざるので、CI は落とさない
+  mutation:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --locked --dev
+
+      # checkout が取り出すのは PR の merge commit。第 1 親との差分が PR の変更になる
+      - name: Mutate changed modules
+        run: |
+          mapfile -t modules < <(git diff --name-only --diff-filter=AMR HEAD^1 -- 'src/*.py' \
+            | sed -E 's#^src/##; s#(/__init__)?\.py$##; s#/#.#g')
+          # 変異の名前は <モジュール>.x_<関数>__mutmut_N か <モジュール>.xǁ<クラス>ǁ<メソッド>__mutmut_N
+          globs=()
+          for m in "${modules[@]}"; do globs+=("$m.x_*" "$m.xǁ*"); done
+          {
+            echo "<!-- mutation-survivors -->"
+            echo "## ミューテーションテスト"
+            echo
+            if [ ${#modules[@]} -eq 0 ]; then
+              echo "src/ の .py に変更が無いので、変異を入れていない。"
+            elif ! uv run mutmut run "${globs[@]}" > mutmut.log 2>&1; then
+              if ! grep -q "nothing matches" mutmut.log; then cat mutmut.log >&2; exit 1; fi
+              echo "変えたモジュールに、変異を入れられる箇所が無い。"
+            else
+              mapfile -t survived < <(uv run mutmut results | awk -F': ' '$2 == "survived" { gsub(/ /, "", $1); print $1 }')
+              echo "変えたモジュール ${#modules[@]} 個に変異を入れ、テストが落とせなかった変異が ${#survived[@]} 個ある。"
+              echo "条件・境界・戻り値・順序が変わるものはテストの穴なので、テストを足す。文言だけの変化や、結果の変わらない書き換えは残してよい。"
+              for s in "${survived[@]}"; do
+                printf '\n<details><summary><code>%s</code></summary>\n\n```diff\n' "$s"
+                uv run mutmut show "$s" | grep -v '^#'
+                printf '```\n\n</details>\n'
+              done
+            fi
+          } > mutation.md
+          # コメントの上限（65,536 文字）に収める
+          if [ "$(wc -c < mutation.md)" -gt 60000 ]; then
+            head -c 60000 mutation.md > mutation.tmp && printf '\n\n（長いので省いた。続きは手元の uv run mutmut results で見る）\n' >> mutation.tmp
+            mv mutation.tmp mutation.md
+          fi
+
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- mutation-survivors -->"))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F body=@mutation.md
+          else
+            gh pr comment "$PR" --body-file mutation.md
+          fi
+
   # PR ごとに、増えた・消えた関数と依存の増減をレビューする人にコメントで出す（テンプレート ADR 0007）
   code-graph:
     # fork からの PR はトークンが読み取り専用でコメントを書けないので走らせない

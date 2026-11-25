@@ -220,3 +220,6 @@ __marimo__/
 .env.*
 !.env.example
 .DS_Store
+
+# mutmut の作業用コピー
+mutants/

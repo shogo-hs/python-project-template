@@ -29,10 +29,12 @@ uv run mypy .                       # 型の検査
 uv run lint-imports                 # 層の依存方向の検査
 uv run deptry src                   # 依存の過不足の検査
 uv run pytest -q                    # テスト（カバレッジ 80% 以上）
+uv run mutmut run '<モジュール>.x*'  # 変えたモジュールに変異を入れる（前に mutants/ を消す）
+uv run mutmut results               # テストが落とせなかった変異の一覧（中身は mutmut show <名前>）
 uv run python tools/code_graph.py --base <変更前の src> --head src   # 関係の差分を手元で見る
 ```
 
-品質ゲートは CI（`.github/workflows/ci.yml`）でも同じものを流す。PR には、CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）をコメントする。
+品質ゲートは CI（`.github/workflows/ci.yml`）でも同じものを流す。PR には、CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）と、変えたモジュールでテストが落とせなかった変異（ミューテーションテスト。CI は落とさない）をコメントする。
 
 ## 構成
 
