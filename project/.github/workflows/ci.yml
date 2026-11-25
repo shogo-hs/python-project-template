@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    # ready_for_review は、下書きを外したときに mutation ジョブを走らせるために足している
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
 
@@ -57,8 +59,9 @@ jobs:
 
   # PR で中身を変えた src/ の関数・メソッドにだけ変異を入れ、テストが落とせなかった変異を PR にコメントする（テンプレート ADR 0010・0011）
   # 生き残りには文言や結果の変わらない書き換えも混ざるので、CI は落とさない
+  # 下書きの PR では走らせない（作業中の push のたびに長いジョブが走るのを避ける。下書きを外すと走る）
   mutation:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
