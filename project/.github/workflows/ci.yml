@@ -119,7 +119,8 @@ jobs:
                 echo "中身を変えた関数・メソッド ${#functions[@]} 個のうち $(cut -f2 mutants.tsv | sort -u | wc -l) 個に、変異を $(wc -l < mutants.tsv) 個入れた。テストが落とせなかった変異が ${#survived[@]} 個、呼ぶテストが無くて確かめられなかった変異が $(count "no tests") 個ある。"
                 echo "条件・境界・戻り値・順序が変わるものはテストの穴なので、テストを足す。文言だけの変化や、結果の変わらない書き換えは残してよい。"
                 if [ -n "$timed_out" ]; then
-                  printf '\n%sので、変異 %s 個は確かめていない。手元で `uv run mutmut run \047<関数>__mutmut_*\047` を流して確かめる。\n' "$timed_out" "$(count "not checked")"
+                  echo
+                  echo "${timed_out}ので、変異 $(count "not checked") 個は確かめていない。手元で \`uv run mutmut run '<関数>__mutmut_*'\` を流して確かめる。"
                   printf '\n<details><summary>確かめていない変異が残っている関数</summary>\n\n```\n'
                   awk -F'\t' '$1 == "not checked" { print $2 }' mutants.tsv | sort -u
                   printf '```\n\n</details>\n'
