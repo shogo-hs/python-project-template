@@ -107,7 +107,7 @@ jobs:
           } > mutation.md
           # コメントの上限（65,536 文字）に収める
           if [ "$(wc -c < mutation.md)" -gt 60000 ]; then
-            head -c 60000 mutation.md > mutation.tmp && printf '\n\n（長いので省いた。手元で `uv run mutmut run` と `uv run mutmut results` で見る）\n' >> mutation.tmp
+            head -c 60000 mutation.md > mutation.tmp && printf '\n\n（長いので省いた。続きは手元の uv run mutmut results で見る）\n' >> mutation.tmp
             mv mutation.tmp mutation.md
           fi
 
