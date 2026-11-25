@@ -29,12 +29,13 @@ uv run mypy .                       # 型の検査
 uv run lint-imports                 # 層の依存方向の検査
 uv run deptry src                   # 依存の過不足の検査
 uv run pytest -q                    # テスト（カバレッジ 80% 以上）
-uv run mutmut run '<モジュール>.x*'  # 変えたモジュールに変異を入れる（前に mutants/ を消す）
+uv run mutmut run '<モジュール>.x*'  # モジュールの関数に変異を入れる（前に mutants/ を消す。関数 1 つなら '<モジュール>.x_<関数>__mutmut_*'）
 uv run mutmut results               # テストが落とせなかった変異の一覧（中身は mutmut show <名前>）
 uv run python tools/code_graph.py --base <変更前の src> --head src   # 関係の差分を手元で見る
+uv run python tools/changed_functions.py --base <変更前の src> --head src   # 中身の変わった関数を mutmut の名前で出す
 ```
 
-品質ゲートは CI（`.github/workflows/ci.yml`）でも同じものを流す。PR には、CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）と、変えたモジュールでテストが落とせなかった変異（ミューテーションテスト。CI は落とさない）をコメントする。
+品質ゲートは CI（`.github/workflows/ci.yml`）でも同じものを流す。PR には、CI がコードの関係の差分（増えた・消えた・引数が変わった関数、モジュールの依存の増減）と、中身を変えた関数・メソッドでテストが落とせなかった変異（ミューテーションテスト。CI は落とさない。変異を流すのは 15 分で打ち切り、確かめていない関数をコメントに出す）をコメントする。
 
 ## 構成
 
@@ -42,6 +43,7 @@ uv run python tools/code_graph.py --base <変更前の src> --head src   # 関�
 src/{{ package_name }}/   # adapters -> application -> ports -> domain の 4 層（依存はこの向きだけ）
 tests/                    # unit/・integration/ と、tools/ のテスト
 tools/code_graph.py       # PR の関係の差分を作るスクリプト（テンプレート由来）
+tools/changed_functions.py  # PR で中身の変わった関数を出すスクリプト（テンプレート由来。mutation ジョブが使う）
 docs/adr/                 # 設計判断の記録
 docs/product/vision.md    # 何のために作るか
 .agents/skills/           # エージェントの手順書（.claude/skills はそこへの symlink）

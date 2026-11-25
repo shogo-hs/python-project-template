@@ -3,7 +3,7 @@
 最終更新: 2026-11-25
 - ステータス: 承認済み(accepted)
 - 決定者: shogo-hs
-- 関連: [ADR 0003](./0003-expand-ci-quality-gates.md), [ADR 0007](./0007-review-relation-diff-and-complexity-gate.md)
+- 関連: [ADR 0003](./0003-expand-ci-quality-gates.md), [ADR 0007](./0007-review-relation-diff-and-complexity-gate.md), [ADR 0011](./0011-mutation-testing-on-changed-functions.md)（変異を入れる範囲を置き換えた）
 
 ## 1. 文脈
 
@@ -46,3 +46,8 @@
 
 - 生き残りのうち直さなくてよいものの割合を、生成先の PR のコメントで数える。文言の変化が多ければ、mutmut の設定で文字列の変異を外せないかを調べる。
 - 1 回の PR で変えたモジュールが多く、ジョブが 10 分を超えるようなら、関数の単位に絞る（`tools/code_graph.py` が出す「変わった定義」を使う）。
+
+## 6. 変更履歴
+
+- 2026-11-25: 初版作成。
+- 2026-11-25: 変異を入れる範囲（変えたモジュール）は、[ADR 0011](./0011-mutation-testing-on-changed-functions.md) で、中身を変えた関数・メソッドに置き換えた（5 節のフォローアップの 2 つ目を実行した。代替案 F の「モジュールの単位なら済む」は、実測で成り立たなかった）。時間の上限とコメントに出す数も 0011 で足した。mutmut を使うこと、生き残りで CI を落とさないこと、テストの規約は変えていない。
