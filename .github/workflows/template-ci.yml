@@ -28,7 +28,7 @@ jobs:
           python-version: "3.14"
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@v10.4.0
 
       # dependabot は根の .github/workflows しか見ないので、生成先の CI の版がずれたらここで止める
       - name: Check action versions match project/
